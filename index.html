@@ -1350,7 +1350,32 @@ let previousScrollY = 0;
 let globalSearchKeyword = "";
 let auctionOpen = false;
 let testingMode = false; // set in DOMContentLoaded
-const API_BASE = "https://script.google.com/macros/s/AKfycbxSfTAJKu7bp_S9GfPN8UE2uLLIMfnMrzvs0wRMOuKPvPX9aghilQy6oeYH4buH_4DG/exec";
+const API_BASE = localStorage.getItem("API_BASE_OVERRIDE") ||
+  "https://script.google.com/macros/s/AKfycbxSfTAJKu7bp_S9GfPN8UE2uLLIMfnMrzvs0wRMOuKPvPX9aghilQy6oeYH4buH_4DG/exec";
+
+async function parseApiResponse(res){
+  const raw = await res.text();
+  let parsed = null;
+
+  try {
+    parsed = JSON.parse(raw);
+  } catch(parseErr){
+    var looksLikeAccessError =
+      /do not have access|you need access|403|google accounts/i.test(raw);
+    var hint = looksLikeAccessError
+      ? "API access denied. Re-deploy Apps Script Web App as: Execute as Me, Access Anyone, then update API_BASE."
+      : "API did not return JSON. Verify API_BASE points to /exec and action handlers are deployed.";
+    throw new Error(hint);
+  }
+
+  if(!res.ok){
+    throw new Error((parsed && parsed.message) ? parsed.message : ("HTTP "+res.status));
+  }
+  if(parsed && parsed.success===false && parsed.message){
+    throw new Error(parsed.message);
+  }
+  return parsed;
+}
 
 async function apiGet(action, params){
   const url = new URL(API_BASE);
@@ -1360,8 +1385,7 @@ async function apiGet(action, params){
     if(val !== undefined && val !== null) url.searchParams.set(key, String(val));
   });
   const res = await fetch(url.toString(), { method: "GET" });
-  if(!res.ok) throw new Error("HTTP "+res.status);
-  return res.json();
+  return parseApiResponse(res);
 }
 
 async function apiPost(action, payload){
@@ -1373,8 +1397,7 @@ async function apiPost(action, payload){
     method: "POST",
     body: form
   });
-  if(!res.ok) throw new Error("HTTP "+res.status);
-  return res.json();
+  return parseApiResponse(res);
 }
 
 /* â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
