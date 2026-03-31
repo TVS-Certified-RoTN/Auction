@@ -1,127 +1,2473 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Dealer Auction Portal</title>
-<style>
-*{ box-sizing:border-box; margin:0; padding:0; }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-body{
-  background:#364586;
-  font-family:Arial, sans-serif;
-  overflow:hidden;
+<style>
+/* â”€â”€ TOKENS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+:root{
+  --brand:      #364586;
+  --brand-dark: #2a3668;
+  --brand-glow: rgba(54,69,134,.15);
+  --gold:       #f0a500;
+  --green:      #10b981;
+  --red:        #ef4444;
+  --bg:         #eef0f7;
+  --card-bg:    #ffffff;
+  --text:       #1a1d2e;
+  --muted:      #6b7280;
+  --radius:     10px;
+  --shadow:     0 2px 12px rgba(54,69,134,.10);
+  --shadow-lg:  0 8px 28px rgba(54,69,134,.18);
 }
 
-/* ── TOP BAR ──────────────────────────────────────── */
+/* â”€â”€ BASE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body{
+  margin:0; background:var(--bg);
+  font-family:'Inter','Plus Jakarta Sans',sans-serif;
+  color:var(--text); font-size:13px;
+  -webkit-font-smoothing:antialiased;
+  padding-top:30px;
+  padding-bottom:30px;
+}
+
+/* â”€â”€ ANIMATIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+@keyframes fadeSlideUp{
+  from{ opacity:0; transform:translateY(28px); }
+  to{   opacity:1; transform:translateY(0);    }
+}
+@keyframes fadeIn{
+  from{ opacity:0; } to{ opacity:1; }
+}
+@keyframes pulse{
+  0%,100%{ box-shadow: 0 0 0 0 rgba(54,69,134,.45); }
+  70%{     box-shadow: 0 0 0 10px rgba(54,69,134,0); }
+}
+@keyframes shimmer{
+  0%{ background-position:-200% 0; }
+  100%{ background-position:200% 0; }
+}
+@keyframes timerBlink{
+  0%,100%{ opacity:1; } 50%{ opacity:.65; }
+}
+@keyframes badgePop{
+  0%{ transform:scale(0.7); opacity:0; }
+  80%{ transform:scale(1.1); }
+  100%{ transform:scale(1); opacity:1; }
+}
+
+/* â”€â”€ LOGIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.login-bg{
+  min-height:100vh;
+  background: linear-gradient(145deg,#1a2550 0%,#364586 50%,#1e3a8a 100%);
+  display:flex; justify-content:center; align-items:center;
+  padding:20px; position:relative; overflow:hidden;
+}
+.login-bg::before{
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,255,255,.07) 0%, transparent 70%);
+}
+.login-bg::after{
+  content:''; position:absolute;
+  width:500px; height:500px; border-radius:50%;
+  background:rgba(255,255,255,.03);
+  top:-150px; right:-150px;
+}
+
+.glass-card{
+  background:rgba(255,255,255,.12);
+  backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,.2);
+  padding:36px 28px; border-radius:22px;
+  width:100%; max-width:400px;
+  color:white;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  animation:fadeSlideUp .6s ease both;
+}
+
+.logo-box{
+  width:140px; height:140px; margin:0 auto 18px;
+  background:white; border-radius:18px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.3); overflow:hidden;
+}
+.brand-logo{ max-width:82%; max-height:82%; object-fit:contain; }
+
+.glass-card h4{
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:22px; font-weight:800;
+  text-align:center; margin-bottom:4px;
+}
+.glass-card p{ text-align:center; opacity:.75; font-size:14px; margin-bottom:20px; }
+
+.login-input{
+  width:100%; padding:14px 16px; border-radius:10px;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.15); color:white;
+  font-family:'Inter',sans-serif; font-size:16px;
+  outline:none; transition:border .2s,background .2s;
+}
+.login-input::placeholder{ color:rgba(255,255,255,.55); }
+.login-input:focus{ border-color:rgba(255,255,255,.6); background:rgba(255,255,255,.22); }
+
+.btn-login{
+  width:100%; padding:14px; border-radius:10px; border:none;
+  background:white; color:var(--brand);
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:16px;
+  cursor:pointer; margin-top:14px;
+  transition:transform .15s, box-shadow .2s, background .2s;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+}
+.btn-login:hover{ transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.3); }
+.btn-login:active{ transform:translateY(0); }
+.btn-login:disabled{ opacity:.65; transform:none; }
+
+.loader{ display:none; text-align:center; margin-top:14px; color:rgba(255,255,255,.8); }
+.spinner{
+  width:26px; height:26px; border-radius:50%;
+  border:3px solid rgba(255,255,255,.3);
+  border-top-color:white;
+  animation:spin .7s linear infinite; display:inline-block;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+/* â”€â”€ FROZEN HEADER (topbar + toolbar + banner as one sticky block) â”€â”€ */
+#frozenHeader{
+  position:sticky;
+  top:30px;
+  z-index:500;
+}
+
+/* â”€â”€ GITHUB WRAPPER BARS (merged from github Index.html) â”€â”€ */
 .brandbar{
   position:fixed;
   top:0; left:0; width:100%;
   height:30px;
-  background:#364586;
+  background:var(--brand);
   color:white;
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  padding:0 10px;
-  z-index:1000;
-  box-shadow:0 2px 6px rgba(0,0,0,.5);
+  justify-content:center;
+  z-index:1200;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
 }
-
-.bar-title{
+.brandbar .bar-title{
   font-weight:700;
   font-size:13px;
   letter-spacing:.3px;
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
   white-space:nowrap;
 }
-
-/* Left and right button slots */
-.bar-left, .bar-right{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  z-index:1;
-}
-
-.bar-btn{
-  padding:3px 10px;
-  border-radius:5px;
-  border:none;
-  font-size:11px;
-  font-weight:700;
-  cursor:pointer;
-  display:none; /* hidden until logged in */
-  transition:filter .15s, transform .1s;
-  white-space:nowrap;
-}
-.bar-btn:active{ transform:scale(.95); }
-
-.btn-mybids{
-  background:#10b981;
-  color:white;
-}
-.btn-mybids:hover{ filter:brightness(1.1); }
-
-.btn-logout{
-  background:rgba(255,255,255,.18);
-  color:white;
-  border:1px solid rgba(255,255,255,.3) !important;
-}
-.btn-logout:hover{ background:rgba(255,255,255,.3); }
-
-/* ── IFRAME ───────────────────────────────────────── */
-iframe{
-  position:absolute;
-  top:30px;
-  left:0;
-  width:100vw;
-  height:calc(100vh - 60px);
-  border:none;
-}
-
-/* ── FOOTER ───────────────────────────────────────── */
 .footerbar{
   position:fixed;
   bottom:0; left:0; width:100%;
   height:30px;
-  background:#364586;
+  background:var(--brand);
   color:white;
   display:flex;
   align-items:center;
   justify-content:center;
   font-size:11px;
   font-weight:600;
-  z-index:999;
-  box-shadow:0 -2px 6px rgba(0,0,0,.5);
+  z-index:1200;
+  box-shadow:0 -2px 6px rgba(0,0,0,.25);
 }
+/* â”€â”€ TOPBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#topbar{
+  background:var(--brand);
+  padding:7px 14px;
+  display:flex; align-items:center; justify-content:space-between;
+  box-shadow:0 2px 10px rgba(0,0,0,.22);
+}
+#dealerName{
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700;
+  color:white; font-size:13px; flex:1;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.topbar-actions{ display:flex; gap:6px; }
+.btn-top{
+  padding:5px 11px; border-radius:7px; border:none;
+  font-family:'Inter',sans-serif; font-weight:600; font-size:12px;
+  cursor:pointer; transition:all .2s;
+}
+.btn-top-bids{ background:var(--green); color:white; }
+.btn-top-logout{ background:rgba(255,255,255,.15); color:white; border:1px solid rgba(255,255,255,.25); }
+.btn-top:hover{ transform:translateY(-1px); filter:brightness(1.1); }
+
+/* â”€â”€ DASHBOARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#dashboard{ display:none; min-height:100vh; padding-bottom:50px; }
+
+@media(max-width:768px){
+  #dashboard{ padding-bottom:100px; }
+}
+
+.toolbar{
+  background:white; padding:7px 12px;
+  box-shadow:0 1px 6px rgba(0,0,0,.08);
+  display:flex; gap:8px; align-items:center;
+}
+.search-wrap{ position:relative; flex:1; }
+.search-wrap svg{
+  position:absolute; left:9px; top:50%; transform:translateY(-50%);
+  color:var(--muted); pointer-events:none; width:14px; height:14px;
+}
+.search-input{
+  width:100%; padding:6px 10px 6px 28px;
+  border:1.5px solid #e5e7eb; border-radius:8px;
+  font-family:'Inter',sans-serif; font-size:12px; outline:none;
+  transition:border .2s;
+}
+.search-input:focus{ border-color:var(--brand); }
+
+.sort-select{
+  width:200px; flex-shrink:0;
+  padding:7px 28px 7px 10px; border:1.5px solid #e5e7eb;
+  border-radius:8px; font-family:'Inter',sans-serif;
+  font-size:12px; outline:none;
+  appearance:none; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b7280' d='M1 1l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 10px center;
+  transition:border .2s; white-space:nowrap;
+}
+.sort-select:focus{ border-color:var(--brand); }
+
+#bidCountBanner{
+  text-align:center; padding:5px 8px;
+  font-weight:600; font-size:11px; color:var(--brand);
+  background:var(--brand-glow); letter-spacing:.2px;
+}
+
+/* â”€â”€ SIDEBAR (desktop only â‰¥769px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#mainLayout{
+  display:block; /* mobile: no change */
+}
+
+@media(min-width:769px){
+  #mainLayout{
+    display:flex;
+    align-items:flex-start;
+    gap:0;
+  }
+
+  /* â”€â”€ LEFT SIDEBAR â”€â”€ */
+  #filterSidebar{
+    width:220px;
+    flex-shrink:0;
+    background:white;
+    border-right:1px solid #e8eaf0;
+    min-height:calc(100vh - 120px);
+    padding:14px 12px 40px;
+    position:sticky;
+    top:120px; /* below frozen header */
+    overflow-y:auto;
+    max-height:calc(100vh - 120px);
+  }
+
+  /* stock grows to fill remaining space */
+  #stock{
+    flex:1;
+    min-width:0;
+  }
+}
+
+@media(max-width:768px){
+  #filterSidebar{ display:none; }
+  /* keep sort-select in toolbar on mobile */
+  .sort-select{ display:block; }
+}
+
+/* Hide sort-select from toolbar on desktop (it moves to sidebar) */
+@media(min-width:769px){
+  .sort-select{ display:none; }
+}
+
+/* â”€â”€ SIDEBAR INTERNALS â”€â”€ */
+.sb-title{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:13px; font-weight:800; color:var(--brand);
+  text-transform:uppercase; letter-spacing:.6px;
+  margin-bottom:14px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.sb-clear{
+  font-size:10px; font-weight:700; color:var(--muted);
+  cursor:pointer; text-transform:uppercase; letter-spacing:.3px;
+  padding:2px 7px; border-radius:4px; border:1px solid #e5e7eb;
+  background:white; transition:all .15s;
+}
+.sb-clear:hover{ background:var(--brand); color:white; border-color:var(--brand); }
+
+.sb-section{
+  margin-bottom:18px;
+  padding-bottom:16px;
+  border-bottom:1px solid #f0f0f5;
+}
+.sb-section:last-child{ border-bottom:none; }
+
+.sb-label{
+  font-size:11px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.5px;
+  margin-bottom:8px;
+}
+
+/* Pill toggle buttons */
+.sb-pills{ display:flex; flex-wrap:wrap; gap:5px; }
+.sb-pill{
+  padding:4px 10px; border-radius:20px;
+  border:1.5px solid #e5e7eb; background:white;
+  font-size:11px; font-weight:600; color:var(--text);
+  cursor:pointer; transition:all .15s;
+  white-space:nowrap;
+}
+.sb-pill:hover{ border-color:var(--brand); color:var(--brand); }
+.sb-pill.active{
+  background:var(--brand); color:white;
+  border-color:var(--brand);
+}
+
+/* Range slider */
+.sb-range-wrap{ padding:2px 0; }
+.sb-range{
+  width:100%; accent-color:var(--brand);
+  cursor:pointer; margin:4px 0;
+}
+.sb-range-labels{
+  display:flex; justify-content:space-between;
+  font-size:10px; color:var(--muted); font-weight:600;
+  margin-top:2px;
+}
+.sb-range-val{
+  font-size:11px; font-weight:700; color:var(--brand);
+  text-align:center; margin-top:2px;
+}
+
+/* Sort select inside sidebar */
+.sb-sort{
+  width:100%; padding:7px 10px;
+  border:1.5px solid #e5e7eb; border-radius:8px;
+  font-family:'Inter',sans-serif; font-size:12px;
+  outline:none; appearance:none;
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b7280' d='M1 1l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 8px center;
+  cursor:pointer; transition:border .2s;
+}
+.sb-sort:focus{ border-color:var(--brand); }
+
+/* Active filter count badge on title */
+.sb-active-count{
+  background:var(--brand); color:white;
+  font-size:9px; font-weight:800;
+  padding:1px 6px; border-radius:10px;
+  display:none;
+}
+.sb-active-count.show{ display:inline-block; }
+
+/* â”€â”€ MOBILE FILTER BUTTON (toolbar) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.mob-filter-btn{
+  display:none; /* hidden on desktop */
+  align-items:center; gap:5px;
+  padding:6px 11px; border-radius:8px; border:1.5px solid #e5e7eb;
+  background:white; color:var(--text);
+  font-family:'Inter',sans-serif; font-size:12px; font-weight:600;
+  cursor:pointer; flex-shrink:0; white-space:nowrap;
+  transition:border-color .15s, background .15s;
+}
+.mob-filter-btn.has-filters{
+  border-color:var(--brand); background:var(--brand-glow); color:var(--brand);
+}
+.mob-filter-count{
+  background:var(--brand); color:white;
+  font-size:10px; font-weight:800;
+  padding:1px 6px; border-radius:10px; margin-left:2px;
+}
+
+@media(max-width:768px){
+  .mob-filter-btn{ display:inline-flex; }
+}
+
+/* â”€â”€ MOBILE FILTER BOTTOM SHEET â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#mobFilterSheet{
+  position:fixed;
+  left:0; right:0; bottom:0;
+  background:white;
+  border-radius:18px 18px 0 0;
+  z-index:8100;
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  max-height:82vh;
+  display:flex; flex-direction:column;
+  box-shadow:0 -8px 40px rgba(0,0,0,.18);
+}
+#mobFilterSheet.open{
+  transform:translateY(0);
+}
+
+.mfs-handle{
+  width:36px; height:4px; border-radius:2px;
+  background:#e5e7eb; margin:10px auto 0; flex-shrink:0;
+}
+.mfs-header{
+  display:flex; align-items:center; gap:8px;
+  padding:12px 16px 10px; flex-shrink:0;
+  border-bottom:1px solid #f0f0f5;
+}
+.mfs-title{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:800; font-size:15px; color:var(--brand); flex:1;
+}
+.mfs-clear{
+  font-size:11px; font-weight:700; color:var(--muted);
+  padding:3px 9px; border-radius:5px; border:1px solid #e5e7eb;
+  background:white; cursor:pointer; transition:all .15s;
+}
+.mfs-clear:hover{ background:var(--brand); color:white; border-color:var(--brand); }
+.mfs-close{
+  width:28px; height:28px; border-radius:50%; border:none;
+  background:#f3f4f6; color:var(--text); font-size:14px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+
+.mfs-body{
+  overflow-y:auto; flex:1; padding:12px 16px;
+  -webkit-overflow-scrolling:touch;
+}
+.mfs-section{
+  margin-bottom:16px; padding-bottom:14px;
+  border-bottom:1px solid #f0f0f5;
+}
+.mfs-section:last-child{ border-bottom:none; }
+.mfs-label{
+  font-size:11px; font-weight:700; color:var(--muted);
+  text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px;
+}
+
+.mfs-footer{
+  padding:10px 16px 16px;
+  border-top:1px solid #f0f0f5; flex-shrink:0;
+}
+.mfs-apply{
+  width:100%; padding:12px; border:none; border-radius:10px;
+  background:linear-gradient(135deg,var(--brand) 0%,#4a5fa8 100%);
+  color:white; font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:700; font-size:14px; cursor:pointer;
+  box-shadow:0 3px 10px rgba(54,69,134,.35);
+}
+
+/* Mobile: sheet locked well above both GitHub bars */
+@media(max-width:768px){
+  #mobFilterSheet{
+    bottom:60px;
+    max-height:calc(100vh - 150px);
+    border-radius:14px 14px 0 0;
+  }
+  .mfs-body{
+    max-height:none;
+    padding-bottom:8px;
+  }
+  .mfs-footer{ padding:10px 16px 16px; }
+  .sort-select{ width:140px; font-size:11px; padding:6px 20px 6px 8px; }
+}
+
+/* â”€â”€ STOCK GRID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#stock{
+  padding:10px;
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap:10px;
+}
+@media(max-width:400px){
+  #stock{ grid-template-columns:1fr; padding:8px; gap:8px; }
+}
+
+/* â”€â”€ VEHICLE CARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.v-card{
+  background:var(--card-bg); border-radius:var(--radius);
+  overflow:hidden; box-shadow:var(--shadow);
+  animation:fadeSlideUp .4s ease both;
+  transition:box-shadow .2s, transform .2s;
+  position:relative;
+}
+.v-card:hover{ box-shadow:var(--shadow-lg); transform:translateY(-2px); }
+
+/* Card image */
+.v-img-wrap{
+  position:relative; width:100%;
+  padding-top:55%; background:#f3f4f6; overflow:hidden;
+  cursor:pointer;
+}
+.v-img-wrap img.main-img{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; transition:transform .3s ease;
+}
+.v-img-wrap:hover img.main-img{ transform:scale(1.03); }
+
+.v-badge-id{
+  position:absolute; bottom:7px; left:7px;
+  background:rgba(0,0,0,.62); backdrop-filter:blur(6px);
+  color:white; padding:3px 8px; border-radius:5px;
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:11px;
+  letter-spacing:.4px;
+}
+.v-badge-num{
+  position:absolute; top:7px; right:7px;
+  background:rgba(54,69,134,.8); backdrop-filter:blur(6px);
+  color:white; padding:3px 8px; border-radius:5px;
+  font-size:10px; font-weight:600;
+}
+.v-badge-bid{
+  position:absolute; top:7px; left:7px;
+  background:var(--green); color:white;
+  padding:3px 8px; border-radius:5px;
+  font-size:10px; font-weight:700;
+  animation:badgePop .3s ease both;
+  display:flex; align-items:center; gap:3px;
+}
+
+/* Thumbnail row */
+.v-thumb-row{
+  display:flex; gap:4px; padding:5px 8px;
+  overflow-x:auto; overflow-y:hidden;
+  background:#f8f9fb;
+  border-bottom:1px solid #eef0f5;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(54,69,134,.2) transparent;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-x;
+  cursor:grab;
+  min-height:46px;
+  width:100%;
+}
+.v-thumb-row::-webkit-scrollbar{ height:2px; }
+.v-thumb-row::-webkit-scrollbar-track{ background:transparent; }
+.v-thumb-row::-webkit-scrollbar-thumb{ background:rgba(54,69,134,.25); border-radius:4px; }
+.v-thumb-row:active{ cursor:grabbing; }
+.v-thumb-row.dragging{ cursor:grabbing; user-select:none; }
+.v-thumb{
+  width:48px; height:36px; flex-shrink:0; flex-grow:0;
+  border-radius:4px; object-fit:cover; cursor:pointer;
+  border:2px solid transparent;
+  transition:border-color .15s, transform .15s;
+  display:block; pointer-events:auto;
+}
+.v-thumb:hover{ border-color:var(--brand); transform:scale(1.05); }
+.v-thumb.active{ border-color:var(--brand); box-shadow:0 0 0 1px var(--brand); }
+
+/* Card body */
+.v-body{ padding:10px 10px 12px; }
+
+.v-title{
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:13px;
+  margin:0 0 5px; color:var(--text); line-height:1.3;
+}
+
+.v-meta{
+  display:flex; gap:8px; margin-bottom:7px; flex-wrap:nowrap;
+  justify-content:space-between; align-items:center;
+}
+.v-meta-item{
+  font-size:11px; color:var(--muted);
+  white-space:nowrap;
+  flex:1 1 0;
+}
+.v-meta-item:nth-child(2){ text-align:center; }
+.v-meta-item:nth-child(3){ text-align:right; }
+.v-meta-item strong{ color:var(--text); font-weight:600; }
+
+/* Bulk detail grid */
+.v-detail-section{
+  margin:6px 0 8px;
+  border:1px solid #eef0f7;
+  border-radius:7px;
+  overflow:hidden;
+}
+.v-detail-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:6px 10px;
+  background:#f8f9ff;
+  cursor:pointer;
+  user-select:none;
+  border-bottom:1px solid #eef0f7;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:700; font-size:11px; color:var(--brand);
+  letter-spacing:.2px;
+}
+.v-detail-header .arrow{ font-size:10px; transition:transform .25s; }
+.v-detail-header.open .arrow{ transform:rotate(180deg); }
+.v-detail-body{ display:none; padding:8px 10px; background:white; }
+.v-detail-body.open{ display:block; }
+.v-detail-grid{
+  display:grid; grid-template-columns:1fr 1fr; gap:5px 10px;
+}
+.v-detail-item{ display:flex; flex-direction:column; gap:1px; }
+.v-detail-label{
+  font-size:9px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.5px; color:var(--muted);
+}
+.v-detail-value{ font-size:11px; font-weight:600; color:var(--text); }
+.v-detail-value.highlight{ color:var(--brand); }
+.v-stage-pill{
+  display:inline-block; padding:1px 7px; border-radius:20px;
+  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.3px;
+  background:rgba(54,69,134,.12); color:var(--brand);
+}
+
+.v-price-row{
+  display:flex; align-items:center; gap:6px;
+  margin-bottom:6px; flex-wrap:wrap;
+  justify-content:flex-start;
+}
+.v-start-price{
+  background:var(--brand-glow); color:var(--brand);
+  padding:3px 9px; border-radius:5px;
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:12px;
+  margin-right:auto;
+}
+.v-highest-badge{
+  background:#fef3c7; color:#92400e;
+  padding:3px 8px; border-radius:5px;
+  font-size:11px; font-weight:600;
+  text-align:right;
+}
+.v-mybid-badge{
+  padding:3px 8px; border-radius:5px;
+  font-size:11px; font-weight:600;
+  text-align:right;
+}
+.v-mybid-leading{ background:#d1fae5; color:#065f46; }
+.v-mybid-outbid{  background:#fee2e2; color:#991b1b; }
+
+/* Timer */
+.v-timer{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 10px; border-radius:7px;
+  font-size:11px; font-weight:700; margin-bottom:8px;
+  transition:background .3s;
+}
+.v-timer-open{
+  background:var(--brand); color:white;
+  animation:timerBlink 2s ease-in-out infinite;
+}
+.v-timer-warn{
+  background:#f59e0b; color:white;
+  animation:timerBlink .9s ease-in-out infinite;
+}
+.v-timer-closed{ background:#ef4444; color:white; }
+.v-timer-countdown{ font-size:13px; font-weight:900; letter-spacing:.8px; }
+
+/* Bid form */
+.v-bid-section{ border-top:1px solid #f0f0f0; padding-top:10px; }
+.v-bid-label{
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700;
+  font-size:10px; color:var(--brand);
+  text-transform:uppercase; letter-spacing:.5px;
+  margin-bottom:7px;
+}
+.v-bid-controls{
+  display:flex; gap:6px; align-items:center;
+}
+.v-bid-btn{
+  width:36px; height:36px; border-radius:8px; border:none;
+  font-size:18px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .12s, filter .15s; flex-shrink:0;
+}
+.v-bid-btn:active{ transform:scale(.88); }
+.v-bid-dec{ background:#fee2e2; color:#dc2626; }
+.v-bid-inc{ background:#d1fae5; color:#059669; }
+
+.v-bid-input{
+  flex:1; text-align:center; padding:8px 4px;
+  border:1.5px solid #e5e7eb; border-radius:8px;
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:15px;
+  color:var(--text); outline:none;
+  transition:border-color .2s; min-width:0;
+}
+.v-bid-input:focus{ border-color:var(--brand); }
+
+.v-date-label{
+  font-size:11px; font-weight:600; color:var(--muted);
+  margin:8px 0 4px;
+}
+.v-date-input, .v-remarks{
+  width:100%; padding:7px 10px;
+  border:1.5px solid #e5e7eb; border-radius:8px;
+  font-family:'Inter',sans-serif; font-size:12px;
+  outline:none; transition:border-color .2s;
+}
+.v-date-input:focus, .v-remarks:focus{ border-color:var(--brand); }
+.v-remarks{ margin-top:6px; min-height:50px; resize:none; }
+
+.btn-submit-bid{
+  width:100%; margin-top:8px; padding:10px;
+  border:none; border-radius:8px;
+  background:linear-gradient(135deg,var(--brand) 0%,#4a5fa8 100%);
+  color:white; font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:700; font-size:13px; cursor:pointer;
+  box-shadow:0 3px 10px rgba(54,69,134,.35);
+  transition:transform .15s, box-shadow .2s, filter .2s;
+}
+.btn-submit-bid:hover{
+  transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(54,69,134,.45);
+  filter:brightness(1.07);
+}
+.btn-submit-bid:active{ transform:scale(.98); }
+
+/* â”€â”€ GALLERY OVERLAY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#galleryOverlay{
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.96); z-index:99999;
+  flex-direction:column;
+}
+#galleryOverlay.active{ display:flex; animation:fadeIn .2s ease; }
+
+/* On mobile: pull overlay away from GitHub's top (30px) and footer (30px) bars */
+@media(max-width:768px){
+  #galleryOverlay{
+    top:20px;
+    bottom:30px;
+  }
+}
+
+/* Top bar: rotate left + close right */
+.gallery-topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 14px 10px;
+  flex-shrink:0;
+  background:rgba(0,0,0,.5);
+}
+
+.gallery-rotate{ display:flex; gap:8px; }
+.gallery-rot-btn{
+  width:38px; height:38px; border-radius:8px; border:none;
+  background:rgba(255,255,255,.18); color:white; font-size:16px;
+  cursor:pointer; transition:background .2s;
+  display:flex; align-items:center; justify-content:center;
+}
+.gallery-rot-btn:hover{ background:rgba(255,255,255,.32); }
+
+.gallery-close{
+  width:38px; height:38px; border-radius:50%;
+  background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25);
+  color:white; font-size:18px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:background .2s; flex-shrink:0;
+}
+.gallery-close:hover{ background:rgba(255,255,255,.32); }
+
+/* Middle: prev / image / next */
+.gallery-mid{
+  flex:1; display:flex; align-items:center;
+  overflow:hidden; min-height:0;
+  position:relative;
+}
+.gallery-prev, .gallery-next{
+  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+  background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.2);
+  color:white; font-size:16px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; z-index:10; margin:0 4px;
+  transition:background .2s;
+}
+.gallery-prev:hover, .gallery-next:hover{ background:rgba(255,255,255,.3); }
+
+/* On mobile: image fills full width, buttons float over it */
+@media(max-width:768px){
+  .gallery-prev, .gallery-next{
+    position:absolute;
+    top:50%; transform:translateY(-50%);
+    z-index:20;
+    margin:0;
+    background:rgba(0,0,0,.45);
+    border:1px solid rgba(255,255,255,.3);
+    width:34px; height:34px;
+  }
+  .gallery-prev{ left:8px; }
+  .gallery-next{ right:8px; }
+}
+
+.gallery-img-wrap{
+  flex:1; display:flex; align-items:center;
+  justify-content:center;
+  height:100%; overflow:hidden;
+  cursor:grab;
+}
+.gallery-img-wrap.dragging{ cursor:grabbing; }
+
+@media(max-width:768px){
+  .gallery-img-wrap{
+    position:absolute;
+    inset:0;
+    width:100%;
+  }
+}
+
+#overlayImg{
+  width:100%; height:auto; max-height:100%;
+  object-fit:contain; display:block;
+  touch-action:none;
+  user-select:none; -webkit-user-select:none;
+  transition:opacity .15s;
+}
+
+/* On mobile push gallery controls below GitHub's top bar */
+@media(max-width:768px){
+  .gallery-topbar{ padding-top:14px; }
+}
+
+/* Bottom: counter + thumb strip */
+.gallery-bottom{
+  flex-shrink:0;
+  background:rgba(0,0,0,.5);
+  padding-bottom:max(20px, env(safe-area-inset-bottom));
+}
+.gallery-ctr{
+  color:rgba(255,255,255,.75); font-size:12px;
+  font-weight:600; text-align:center;
+  padding:8px 0 6px; letter-spacing:.5px;
+}
+
+/* Thumbnails: fill full width, auto-size, scrollable */
+.gallery-thumbs{
+  display:flex;
+  gap:0;
+  padding:0;
+  overflow-x:auto;
+  width:100%;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-x;
+  box-sizing:border-box;
+  margin-bottom:8px;
+}
+.gallery-thumbs::-webkit-scrollbar{ display:none; }
+
+/* Each thumb: auto width fills the row, min/max keeps them usable */
+.gallery-thumb{
+  flex:0 0 auto;
+  width:calc(100vw / 6); /* show ~6 at a time, scroll for more */
+  max-width:80px;
+  min-width:44px;
+  aspect-ratio:4/3;
+  height:auto;
+  object-fit:cover; cursor:pointer;
+  border:2px solid transparent;
+  border-top:2px solid transparent;
+  opacity:.55;
+  transition:opacity .2s, border-color .2s;
+  box-sizing:border-box;
+}
+.gallery-thumb.active{ border-color:white; opacity:1; }
+.gallery-thumb:hover{ opacity:.85; }
+
+@media(max-width:768px){
+  .gallery-bottom{
+    padding-bottom:max(44px, env(safe-area-inset-bottom));
+  }
+  .gallery-thumb{
+    width:calc(100vw / 5); /* show ~5 on small screens */
+  }
+}
+
+/* â”€â”€ SUMMARY OVERLAY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+#summaryOverlay{
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.6); z-index:9999;
+  align-items:center; justify-content:center;
+  padding:16px;
+}
+#summaryOverlay.active{
+  display:flex; animation:fadeIn .2s ease;
+}
+.summary-sheet{
+  background:white; border-radius:16px;
+  width:100%; max-width:1100px; max-height:90vh;
+  overflow-y:auto; padding:20px;
+  animation:fadeSlideUp .3s ease both;
+}
+.summary-header{
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:16px;
+}
+.summary-title{
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:800;
+  font-size:18px; color:var(--brand);
+}
+.btn-close-summary{
+  width:34px; height:34px; border-radius:50%; border:none;
+  background:#f3f4f6; color:var(--text); font-size:16px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:background .2s;
+}
+.btn-close-summary:hover{ background:#e5e7eb; }
+
+.sum-stats{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.sum-stat{
+  flex:1; min-width:100px; padding:14px 12px; border-radius:12px;
+  background:var(--brand-glow); border:1.5px solid rgba(54,69,134,.15);
+  text-align:center; cursor:pointer;
+  transition:border-color .15s, background .15s, transform .12s;
+  user-select:none;
+}
+.sum-stat:hover{ border-color:var(--brand); background:rgba(54,69,134,.12); transform:translateY(-1px); }
+.sum-stat.active{ border-color:var(--brand); background:var(--brand); }
+.sum-stat.active .sv{ color:white !important; }
+.sum-stat.active .sl{ color:rgba(255,255,255,.8); }
+.sum-stat .sv{
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:28px; font-weight:900; color:var(--brand);
+}
+.sum-stat .sl{ font-size:11px; color:var(--muted); font-weight:700; text-transform:uppercase; }
+
+.sum-table{ width:100%; border-collapse:collapse; }
+.sum-table th{
+  background:var(--brand); color:white; padding:11px 14px;
+  font-size:13px; font-weight:600; text-align:left; white-space:nowrap;
+}
+.sum-table td{
+  padding:11px 14px; border-bottom:1px solid #f0f0f0;
+  font-size:13px; white-space:nowrap;
+}
+.sum-table tr:hover td{ background:#f8f9ff; }
+.sum-lead{
+  background:#d1fae5; color:#065f46; padding:4px 10px;
+  border-radius:20px; font-size:12px; font-weight:800;
+}
+.sum-out{
+  background:#fee2e2; color:#991b1b; padding:4px 10px;
+  border-radius:20px; font-size:12px; font-weight:800;
+}
+
+@media(max-width:700px){
+  .sum-table thead{ display:none; }
+  .sum-table tr{
+    display:block; border:1px solid #e5e7eb; border-radius:10px;
+    margin-bottom:10px; padding:10px;
+  }
+  .sum-table td{
+    display:block; border:none; padding:4px 0; white-space:normal;
+  }
+  .sum-table td::before{
+    content:attr(data-label); font-weight:700;
+    color:var(--brand); margin-right:6px;
+  }
+}
+
+/* â”€â”€ CONFIRM MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.modal-content{ border-radius:16px; border:none; }
+.modal-header{
+  border-bottom:1px solid #f0f0f0; padding:16px 20px;
+}
+.modal-title{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; }
+.btn-confirm-bid{
+  background:var(--brand); color:white; border:none;
+  padding:10px 22px; border-radius:8px; font-weight:600;
+  transition:filter .2s;
+}
+.btn-confirm-bid:hover{ filter:brightness(1.1); }
+
+/* â”€â”€ SKELETON LOADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.skeleton-card{
+  background:white; border-radius:var(--radius);
+  overflow:hidden; box-shadow:var(--shadow);
+}
+.skeleton-img{
+  width:100%; padding-top:56%;
+  background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.4s infinite;
+}
+.skeleton-line{
+  height:14px; border-radius:6px; margin:10px 16px;
+  background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.4s infinite;
+}
+.skeleton-line.short{ width:55%; }
+
+/* â”€â”€ DUAL RANGE SLIDER (year filter) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.dual-range-wrap{
+  position:relative;
+  height:20px;
+  margin:10px 0 6px;
+}
+.dual-range-track{
+  position:absolute;
+  top:50%; transform:translateY(-50%);
+  left:0; right:0;
+  height:4px; background:#e5e7eb; border-radius:2px; pointer-events:none;
+}
+.dual-range-fill{
+  position:absolute; height:100%;
+  background:var(--brand); border-radius:2px;
+}
+.dual-range-wrap input[type=range]{
+  position:absolute;
+  left:0; top:0;
+  width:100%; height:100%;
+  margin:0; padding:0;
+  background:transparent;
+  -webkit-appearance:none; appearance:none;
+  pointer-events:none;
+}
+.dual-range-wrap input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  pointer-events:all; cursor:pointer;
+  width:18px; height:18px; border-radius:50%;
+  background:var(--brand); border:3px solid white;
+  box-shadow:0 1px 6px rgba(54,69,134,.4);
+  position:relative; z-index:2;
+}
+.dual-range-wrap input[type=range]::-moz-range-thumb{
+  pointer-events:all; cursor:pointer;
+  width:14px; height:14px; border-radius:50%;
+  background:var(--brand); border:3px solid white;
+  box-shadow:0 1px 6px rgba(54,69,134,.4);
+}
+.dual-range-wrap input[type=range]:focus{ outline:none; }
+
+/* â”€â”€ SCROLLBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+::-webkit-scrollbar{ width:6px; height:6px; }
+::-webkit-scrollbar-track{ background:#f1f1f1; }
+::-webkit-scrollbar-thumb{ background:#c1c7d9; border-radius:4px; }
 </style>
 </head>
 <body>
-
 <div class="brandbar">
-  <div class="bar-left"></div>
   <div class="bar-title">Dealer Auction Portal</div>
-  <div class="bar-right"></div>
+</div>
+<!-- â”€â”€ GALLERY OVERLAY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div id="galleryOverlay">
+  <!-- Top bar: rotate + close always visible -->
+  <div class="gallery-topbar">
+    <div class="gallery-rotate">
+      <button class="gallery-rot-btn" onclick="rotateImg(-90)">â†º</button>
+      <button class="gallery-rot-btn" onclick="rotateImg(90)">â†»</button>
+    </div>
+    <button class="gallery-close" onclick="closeOverlay()">âœ•</button>
+  </div>
+  <!-- Middle: prev / image / next -->
+  <div class="gallery-mid">
+    <button class="gallery-prev" onclick="prevImage()">&#10094;</button>
+    <div class="gallery-img-wrap" id="galleryImgWrap">
+      <img id="overlayImg" src="" alt="Vehicle Photo"
+           onerror="this.src='https://via.placeholder.com/800x400?text=No+Image'">
+    </div>
+    <button class="gallery-next" onclick="nextImage()">&#10095;</button>
+  </div>
+  <!-- Bottom: counter + thumbs -->
+  <div class="gallery-bottom">
+    <div class="gallery-ctr" id="overlayCtr">1 / 1</div>
+    <div class="gallery-thumbs" id="galleryThumbsBar"></div>
+  </div>
 </div>
 
-<iframe
-  id="auctionFrame"
-  src="https://script.google.com/macros/s/AKfycbxSfTAJKu7bp_S9GfPN8UE2uLLIMfnMrzvs0wRMOuKPvPX9aghilQy6oeYH4buH_4DG/exec"
-  allowfullscreen>
-</iframe>
+<!-- â”€â”€ LOGIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div id="loginDiv" class="login-bg">
+  <div class="glass-card">
+    <div class="logo-box">
+      <img src="https://drive.google.com/thumbnail?id=1FREFFtAgLbSXJfKGIR_f1OxGt5qR6vMX&sz=w2000" class="brand-logo"
+           onerror="this.style.display='none'">
+    </div>
+    <h4>Dealer Auction Portal</h4>
+    <p>Secure Dealer Verification</p>
+    <input id="mobile" class="login-input" type="tel"
+           placeholder="Enter Registered Mobile" autocomplete="tel">
+    <button id="loginBtn" class="btn-login" onclick="login()">Verify Dealer</button>
+    <div id="loader" class="loader">
+      <div class="spinner"></div>
+      <div style="margin-top:8px;font-size:13px;">Verifying...</div>
+    </div>
+  </div>
+</div>
+
+<!-- â”€â”€ DASHBOARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div id="dashboard">
+
+  <!-- Frozen header block: sticks as one unit -->
+  <div id="frozenHeader">
+    <div id="topbar">
+      <div id="dealerName">Welcome</div>
+      <div class="topbar-actions">
+        <button id="summaryBtn" class="btn-top btn-top-bids" onclick="openSummary()" style="display:none;">
+          ðŸ“‹ My Bids
+        </button>
+        <button id="appLogoutBtn" class="btn-top btn-top-logout" style="display:none;">
+          Logout
+        </button>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" id="localSearch" class="search-input"
+               placeholder="Search Vehicle ID, Make, Year, KMâ€¦"
+               oninput="filterVehicles()">
+      </div>
+      <!-- Mobile filter button â€” hidden on desktop -->
+      <button class="mob-filter-btn" id="mobFilterBtn" onclick="openMobFilter()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+        </svg>
+        Filters
+        <span class="mob-filter-count" id="mobFilterCount" style="display:none">0</span>
+      </button>
+      <select id="priceSort" class="sort-select" onchange="renderStock()">
+        <option value="default">Sort: Vehicle ID</option>
+        <option value="low">Price: Low â†’ High</option>
+        <option value="high">Price: High â†’ Low</option>
+        <option value="kmLow">KM: Low â†’ High</option>
+        <option value="kmHigh">KM: High â†’ Low</option>
+        <option value="yearNew">Year: New â†’ Old</option>
+        <option value="yearOld">Year: Old â†’ New</option>
+      </select>
+    </div>
+    <div id="bidCountBanner"></div>
+  </div>
+
+  <!-- Desktop layout: sidebar + cards -->
+  <div id="mainLayout">
+
+    <!-- â”€â”€ LEFT FILTER SIDEBAR (desktop only) â”€â”€ -->
+    <div id="filterSidebar">
+
+      <div class="sb-title">
+        Filters
+        <span class="sb-active-count" id="sbActiveCount">0</span>
+        <button class="sb-clear" onclick="clearAllFilters()">Reset</button>
+      </div>
+
+      <!-- Sort By -->
+      <div class="sb-section">
+        <div class="sb-label">Sort By</div>
+        <select class="sb-sort" id="priceSortSidebar" onchange="onSidebarSort()">
+          <option value="default">Vehicle ID (Default)</option>
+          <option value="low">Price: Low â†’ High</option>
+          <option value="high">Price: High â†’ Low</option>
+          <option value="kmLow">KM: Low â†’ High</option>
+          <option value="kmHigh">KM: High â†’ Low</option>
+          <option value="yearNew">Year: New â†’ Old</option>
+          <option value="yearOld">Year: Old â†’ New</option>
+        </select>
+      </div>
+
+      <!-- Fuel Type -->
+      <div class="sb-section">
+        <div class="sb-label">Fuel Type</div>
+        <div class="sb-pills" id="sbFuel"></div>
+      </div>
+
+      <!-- Transmission -->
+      <div class="sb-section">
+        <div class="sb-label">Transmission</div>
+        <div class="sb-pills" id="sbTransmission"></div>
+      </div>
+
+      <!-- Ownership -->
+      <div class="sb-section">
+        <div class="sb-label">Ownership</div>
+        <div class="sb-pills">
+          <button class="sb-pill" data-filter="owner" data-val="1" onclick="togglePill(this)">1st Owner</button>
+          <button class="sb-pill" data-filter="owner" data-val="2" onclick="togglePill(this)">2nd Owner</button>
+          <button class="sb-pill" data-filter="owner" data-val="3" onclick="togglePill(this)">3rd Owner</button>
+          <button class="sb-pill" data-filter="owner" data-val="4" onclick="togglePill(this)">4th+ Owner</button>
+        </div>
+      </div>
+
+      <!-- Price Range -->
+      <div class="sb-section">
+        <div class="sb-label">Price Range</div>
+        <div class="sb-pills" id="sbPriceRange">
+          <button class="sb-pill" data-filter="priceRange" data-val="0-50000"       onclick="togglePill(this)">0â€“50K</button>
+          <button class="sb-pill" data-filter="priceRange" data-val="50000-100000"  onclick="togglePill(this)">50Kâ€“1L</button>
+          <button class="sb-pill" data-filter="priceRange" data-val="100000-200000" onclick="togglePill(this)">1Lâ€“2L</button>
+          <button class="sb-pill" data-filter="priceRange" data-val="200000-300000" onclick="togglePill(this)">2Lâ€“3L</button>
+          <button class="sb-pill" data-filter="priceRange" data-val="300000-400000" onclick="togglePill(this)">3Lâ€“4L</button>
+          <button class="sb-pill" data-filter="priceRange" data-val="400000-500000" onclick="togglePill(this)">4Lâ€“5L</button>
+          <button class="sb-pill" data-filter="priceRange" data-val="500000-800000" onclick="togglePill(this)">5Lâ€“8L</button>
+          <button class="sb-pill" data-filter="priceRange" data-val="800000-1000000" onclick="togglePill(this)">8Lâ€“10L</button>
+          <button class="sb-pill" data-filter="priceRange" data-val="1000000-99999999" onclick="togglePill(this)">10L+</button>
+        </div>
+      </div>
+
+      <!-- KM Range -->
+      <div class="sb-section">
+        <div class="sb-label">KM Driven (up to)</div>
+        <div class="sb-range-wrap">
+          <input type="range" class="sb-range" id="sbKmRange"
+                 min="0" max="300000" step="10000" value="300000"
+                 oninput="onRangeChange('sbKmRange','sbKmVal', v => v>=300000 ? 'Any' : Number(v).toLocaleString('en-IN')+' KM')">
+          <div class="sb-range-val" id="sbKmVal">Any</div>
+          <div class="sb-range-labels"><span>0</span><span>3L KM</span></div>
+        </div>
+      </div>
+
+      <!-- Year Range -->
+      <div class="sb-section">
+        <div class="sb-label">Year</div>
+        <div class="dual-range-wrap">
+          <div class="dual-range-track"><div class="dual-range-fill" id="sbYearFill"></div></div>
+          <input type="range" id="sbYearMin" min="2000" max="2025" step="1" value="2000" oninput="onDualYear('min','sb')">
+          <input type="range" id="sbYearMax" min="2000" max="2025" step="1" value="2025" oninput="onDualYear('max','sb')">
+        </div>
+        <div class="sb-range-val" id="sbYearVal">2000 â€“ 2025</div>
+        <div class="sb-range-labels"><span>2000</span><span>2025</span></div>
+      </div>
+
+    </div>
+    <!-- â”€â”€ END SIDEBAR â”€â”€ -->
+
+    <div id="stock"></div>
+  </div>
+</div>
+
+<!-- â”€â”€ MOBILE FILTER BOTTOM SHEET â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div id="mobFilterOverlay" onclick="closeMobFilter()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:8000;"></div>
+<div id="mobFilterSheet">
+  <div class="mfs-handle"></div>
+  <div class="mfs-header">
+    <span class="mfs-title">Filters</span>
+    <button class="mfs-clear" onclick="clearAllFilters()">Reset All</button>
+    <button class="mfs-close" onclick="closeMobFilter()">âœ•</button>
+  </div>
+  <div class="mfs-body">
+
+    <!-- Price Range -->
+    <div class="mfs-section">
+      <div class="mfs-label">Price Range</div>
+      <div class="sb-pills" id="mobSbPriceRange">
+        <button class="sb-pill" data-filter="priceRange" data-val="0-50000"        data-mob="1" onclick="toggleMobPill(this)">0â€“50K</button>
+        <button class="sb-pill" data-filter="priceRange" data-val="50000-100000"   data-mob="1" onclick="toggleMobPill(this)">50Kâ€“1L</button>
+        <button class="sb-pill" data-filter="priceRange" data-val="100000-200000"  data-mob="1" onclick="toggleMobPill(this)">1Lâ€“2L</button>
+        <button class="sb-pill" data-filter="priceRange" data-val="200000-300000"  data-mob="1" onclick="toggleMobPill(this)">2Lâ€“3L</button>
+        <button class="sb-pill" data-filter="priceRange" data-val="300000-400000"  data-mob="1" onclick="toggleMobPill(this)">3Lâ€“4L</button>
+        <button class="sb-pill" data-filter="priceRange" data-val="400000-500000"  data-mob="1" onclick="toggleMobPill(this)">4Lâ€“5L</button>
+        <button class="sb-pill" data-filter="priceRange" data-val="500000-800000"  data-mob="1" onclick="toggleMobPill(this)">5Lâ€“8L</button>
+        <button class="sb-pill" data-filter="priceRange" data-val="800000-1000000" data-mob="1" onclick="toggleMobPill(this)">8Lâ€“10L</button>
+        <button class="sb-pill" data-filter="priceRange" data-val="1000000-99999999" data-mob="1" onclick="toggleMobPill(this)">10L+</button>
+      </div>
+    </div>
+
+    <!-- Fuel Type -->
+    <div class="mfs-section">
+      <div class="mfs-label">Fuel Type</div>
+      <div class="sb-pills" id="mobSbFuel"></div>
+    </div>
+
+    <!-- Transmission -->
+    <div class="mfs-section">
+      <div class="mfs-label">Transmission</div>
+      <div class="sb-pills" id="mobSbTransmission"></div>
+    </div>
+
+    <!-- Ownership -->
+    <div class="mfs-section">
+      <div class="mfs-label">Ownership</div>
+      <div class="sb-pills">
+        <button class="sb-pill" data-filter="owner" data-val="1" data-mob="1" onclick="toggleMobPill(this)">1st Owner</button>
+        <button class="sb-pill" data-filter="owner" data-val="2" data-mob="1" onclick="toggleMobPill(this)">2nd Owner</button>
+        <button class="sb-pill" data-filter="owner" data-val="3" data-mob="1" onclick="toggleMobPill(this)">3rd Owner</button>
+        <button class="sb-pill" data-filter="owner" data-val="4" data-mob="1" onclick="toggleMobPill(this)">4th+ Owner</button>
+      </div>
+    </div>
+
+    <!-- KM Range -->
+    <div class="mfs-section">
+      <div class="mfs-label">KM Driven (up to)</div>
+      <div class="sb-range-wrap">
+        <input type="range" class="sb-range" id="mobKmRange"
+               min="0" max="300000" step="10000" value="300000"
+               oninput="onRangeChange('mobKmRange','mobKmVal', function(v){ return v>=300000?'Any':Number(v).toLocaleString('en-IN')+' KM'; })">
+        <div class="sb-range-val" id="mobKmVal">Any</div>
+        <div class="sb-range-labels"><span>0</span><span>3L KM</span></div>
+      </div>
+    </div>
+
+    <!-- Year Range -->
+    <div class="mfs-section">
+      <div class="mfs-label">Year</div>
+      <div class="dual-range-wrap">
+        <div class="dual-range-track"><div class="dual-range-fill" id="mobYearFill"></div></div>
+        <input type="range" id="mobYearMin" min="2000" max="2025" step="1" value="2000" oninput="onDualYear('min','mob')">
+        <input type="range" id="mobYearMax" min="2000" max="2025" step="1" value="2025" oninput="onDualYear('max','mob')">
+      </div>
+      <div class="sb-range-val" id="mobYearVal">2000 â€“ 2025</div>
+      <div class="sb-range-labels"><span>2000</span><span>2025</span></div>
+    </div>
+
+  </div>
+  <div class="mfs-footer">
+    <button class="mfs-apply" onclick="closeMobFilter()">View Results</button>
+  </div>
+</div>
+
+<!-- â”€â”€ SUMMARY OVERLAY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div id="summaryOverlay">
+  <div class="summary-sheet">
+    <div class="summary-header">
+      <div class="summary-title">ðŸ“‹ My Bid Summary</div>
+      <button class="btn-close-summary" onclick="closeSummary()">âœ•</button>
+    </div>
+    <div id="summaryStats" class="sum-stats"></div>
+    <div id="summaryLoader" style="text-align:center;padding:30px;color:var(--brand);display:none;">
+      <div class="spinner" style="border-color:rgba(54,69,134,.2);border-top-color:var(--brand);"></div>
+      <div style="margin-top:10px;font-weight:600;font-size:14px;">Loading bidsâ€¦</div>
+    </div>
+    <div id="summaryContent"></div>
+  </div>
+</div>
+
+<!-- â”€â”€ CONFIRM MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+<div class="modal fade" id="confirmBidModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Your Bid</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body"><p id="confirmBidText"></p></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-confirm-bid" id="confirmBidBtn">Confirm & Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="footerbar">
   © 2026 Dealer Auction Platform | Secure Dealer Environment
 </div>
 
 <script>
+/* â”€â”€ STATE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+let dealer = {}, data = {}, vehicleGalleryMap = {};
+let vehicleActiveIndex = {};
+let currentImages = [], currentImageIndex = 0;
+let currentRotation = 0, currentZoom = 1;
+let previousScrollY = 0;
+let globalSearchKeyword = "";
+let auctionOpen = false;
+let testingMode = false; // set in DOMContentLoaded
+
+/* â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function getIncrement(p){ return p>=700000?7000:p>=500000?5000:2000; }
+function todayDate(){
+  const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function fmtINR(n){ return "\u20B9"+Number(n).toLocaleString("en-IN"); }
+
+function formatRegistrationPrefix(regNo){
+  var cleaned = String(regNo || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  var match = cleaned.match(/^([A-Z]{2})(\d{1,2})/);
+  if(!match) return "";
+  return match[1] + match[2].padStart(2, "0");
+}
+
+function syncAuctionState(now){
+  now = now || new Date();
+  const reset = new Date(now);
+  const close = new Date(now);
+  reset.setHours(11,0,0,0);
+  close.setHours(20,0,0,0);
+  auctionOpen = testingMode ? true : now >= reset && now < close;
+}
+
+/* â”€â”€ INIT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+document.addEventListener("DOMContentLoaded", function(){
+  dealer={}; data={};
+  document.getElementById("dashboard").style.display="none";
+  document.getElementById("loginDiv").style.display="flex";
+
+  const saved = localStorage.getItem("lastDealerMobile");
+  if(saved) document.getElementById("mobile").value=saved;
+
+  const params = new URLSearchParams(window.location.search);
+  globalSearchKeyword = (params.get("search")||"").toLowerCase().trim();
+
+  // Keep auction timing aligned with the live window unless testing is enabled.
+  testingMode = true;
+  syncAuctionState();
+  scheduleTimerReset();
+  // Init dual year range fill indicators
+  setTimeout(function(){
+    updateDualFill("sbYearFill",  document.getElementById("sbYearMin"),  document.getElementById("sbYearMax"));
+    updateDualFill("mobYearFill", document.getElementById("mobYearMin"), document.getElementById("mobYearMax"));
+  }, 0);
+  window.addEventListener("resize", function(){
+    updateDualFill("sbYearFill",  document.getElementById("sbYearMin"),  document.getElementById("sbYearMax"));
+    updateDualFill("mobYearFill", document.getElementById("mobYearMin"), document.getElementById("mobYearMax"));
+  });
+});
+
+/* â”€â”€ LOGOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function doLogout(){
+  sessionStorage.removeItem("dealerSession");
+  dealer={}; data={};
+  document.getElementById("stock").innerHTML="";
+  document.getElementById("dashboard").style.display="none";
+  document.getElementById("loginDiv").style.display="flex";
+  document.getElementById("dealerName").textContent="Welcome";
+  document.getElementById("appLogoutBtn").style.display="none";
+  document.getElementById("summaryBtn").style.display="none";
+}
+document.addEventListener("DOMContentLoaded", function(){
+  document.getElementById("appLogoutBtn").onclick = doLogout;
+});
+
+/* â”€â”€ LISTEN FOR COMMANDS FROM PARENT FRAME (kept as fallback) â”€â”€ */
 window.addEventListener("message", function(e){
   var type = (e.data && e.data.type) ? e.data.type : e.data;
-  if(type === "OPEN_MODAL")  document.body.style.overflow = "hidden";
-  if(type === "CLOSE_MODAL") document.body.style.overflow = "";
+  if(!type) return;
+  if(type==="ACTION_MY_BIDS") openSummary();
+  if(type==="ACTION_LOGOUT")  doLogout();
 });
+
+/* â”€â”€ LOGIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function login(){
+  const mobile = document.getElementById("mobile").value.trim();
+  if(!mobile){ alert("Enter Mobile"); return; }
+
+  const btn = document.getElementById("loginBtn");
+  btn.disabled=true; btn.textContent="Verifying...";
+  document.getElementById("loader").style.display="block";
+
+  google.script.run
+    .withSuccessHandler(function(r){
+      document.getElementById("loader").style.display="none";
+      btn.disabled=false; btn.textContent="Verify Dealer";
+      if(!r.success){ alert(r.message); return; }
+
+      dealer=r;
+      localStorage.setItem("lastDealerMobile",mobile);
+      var dealerTag = dealer.dealerId ? " (ID: " + dealer.dealerId + ")" : "";
+      document.getElementById("dealerName").textContent = dealer.dealerName + dealerTag;
+      document.getElementById("loginDiv").style.display="none";
+      document.getElementById("dashboard").style.display="block";
+      document.getElementById("appLogoutBtn").style.display="inline-flex";
+      document.getElementById("summaryBtn").style.display="inline-flex";
+      showSkeletons();
+      loadStock();
+    })
+    .withFailureHandler(function(err){
+      document.getElementById("loader").style.display="none";
+      btn.disabled=false; btn.textContent="Verify Dealer";
+      alert("Error: "+err.message);
+    })
+    .loginDealer(mobile);
+}
+
+/* â”€â”€ SKELETON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function showSkeletons(){
+  let h="";
+  for(let i=0;i<4;i++){
+    h+=`<div class="skeleton-card">
+      <div class="skeleton-img"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+      <div class="skeleton-line"></div>
+    </div>`;
+  }
+  document.getElementById("stock").innerHTML=h;
+}
+
+/* â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function renderStock(){
+  const container = document.getElementById("stock");
+  const today = todayDate();
+  const bids = data.allBids||[];
+  const dealerBids = bids.filter(b=>b.mobile==dealer.mobile);
+  const listedIds = (data.inventory||[]).map(v=>v.vehicleId);
+  const validBids = dealerBids.filter(b=>listedIds.includes(b.vehicleId));
+  const bidVIds = [...new Set(validBids.map(b=>b.vehicleId))];
+
+  const banner = document.getElementById("bidCountBanner");
+  banner.textContent = bidVIds.length>0
+    ? "You have active bids on "+bidVIds.length+" vehicle(s)"
+    : "";
+
+  // Build dynamic sidebar pills from live data, then apply filters
+  buildSidebarPills();
+  applySidebarFilters();
+}
+
+/* â”€â”€ BID CONTROLS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function increase(id){
+  const el=document.getElementById("bid"+id);
+  el.value=Number(el.value)+getIncrement(Number(el.getAttribute("data-start")));
+}
+function decrease(id){
+  const el=document.getElementById("bid"+id);
+  const start=Number(el.getAttribute("data-start"));
+  el.value=Math.max(start,Number(el.value)-getIncrement(start));
+}
+
+/* â”€â”€ CARD THUMBNAIL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function setCardImage(vid,pi,src,thumbEl){
+  vehicleActiveIndex[vid] = pi;   // remember which photo is active
+  const big=document.getElementById("big"+vid);
+  if(big){
+    big.style.opacity="0";
+    setTimeout(function(){ big.src=src; big.style.opacity="1"; },100);
+    big.style.transition="opacity .15s";
+  }
+  const row=document.getElementById("thumbs-"+vid);
+  if(row) row.querySelectorAll(".v-thumb").forEach(function(t,i){ t.classList.toggle("active",i===pi); });
+}
+
+/* â”€â”€ MOBILE FILTER BOTTOM SHEET â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function openMobFilter(){
+  // Sync mobile pill states from current sbFilters
+  syncMobPills();
+  // Sync mobile sort
+  var ms = document.getElementById("priceSortMobile");
+  if(ms) ms.value = sbFilters.sort;
+  // Sync range sliders
+  var kmR = document.getElementById("mobKmRange");
+  if(kmR){ kmR.value = sbFilters.kmMax; document.getElementById("mobKmVal").textContent = sbFilters.kmMax>=300000?"Any":Number(sbFilters.kmMax).toLocaleString("en-IN")+" KM"; }
+  // Sync dual year sliders
+  var yrMin = document.getElementById("mobYearMin"), yrMax = document.getElementById("mobYearMax");
+  if(yrMin){ yrMin.value = sbFilters.yearMin; }
+  if(yrMax){ yrMax.value = sbFilters.yearMax; }
+  document.getElementById("mobYearVal").textContent = sbFilters.yearMin+" â€“ "+sbFilters.yearMax;
+  updateDualFill("mobYearFill", yrMin, yrMax);
+
+  document.getElementById("mobFilterSheet").classList.add("open");
+  document.getElementById("mobFilterOverlay").style.display = "block";
+  document.body.style.overflow = "hidden";
+  // Repaint fill now that the sheet is visible and has a real width
+  setTimeout(function(){
+    updateDualFill("mobYearFill", document.getElementById("mobYearMin"), document.getElementById("mobYearMax"));
+  }, 50);
+}
+
+function closeMobFilter(){
+  document.getElementById("mobFilterSheet").classList.remove("open");
+  document.getElementById("mobFilterOverlay").style.display = "none";
+  document.body.style.overflow = "";
+}
+
+function syncMobPills(){
+  // Rebuild mobile fuel + transmission pills from inventory
+  if(!data.inventory) return;
+  var fuels = [...new Set(data.inventory.map(function(v){ return (v.fuelType||"").trim(); }).filter(Boolean))].sort();
+  var trans = [...new Set(data.inventory.map(function(v){ return (v.transmission||"").trim(); }).filter(Boolean))].sort();
+
+  var fEl = document.getElementById("mobSbFuel");
+  var tEl = document.getElementById("mobSbTransmission");
+  if(fEl) fEl.innerHTML = fuels.map(function(f){
+    var active = sbFilters.fuel.includes(f) ? " active" : "";
+    return `<button class="sb-pill${active}" data-filter="fuel" data-val="${f}" data-mob="1" onclick="toggleMobPill(this)">${f}</button>`;
+  }).join("");
+  if(tEl) tEl.innerHTML = trans.map(function(t){
+    var active = sbFilters.transmission.includes(t) ? " active" : "";
+    return `<button class="sb-pill${active}" data-filter="transmission" data-val="${t}" data-mob="1" onclick="toggleMobPill(this)">${t}</button>`;
+  }).join("");
+
+  // Sync price range pills
+  document.querySelectorAll("[data-mob='1'][data-filter='priceRange']").forEach(function(p){
+    p.classList.toggle("active", sbFilters.priceRange.includes(p.getAttribute("data-val")));
+  });
+  // Sync ownership pills
+  document.querySelectorAll("[data-mob='1'][data-filter='owner']").forEach(function(p){
+    p.classList.toggle("active", sbFilters.owner.includes(p.getAttribute("data-val")));
+  });
+}
+
+/* Mobile pill toggle â€” same logic as desktop but targets mob pills */
+function toggleMobPill(btn){
+  btn.classList.toggle("active");
+  var filter = btn.getAttribute("data-filter");
+  var val    = btn.getAttribute("data-val");
+  if(!sbFilters[filter]) sbFilters[filter] = [];
+  if(btn.classList.contains("active")){
+    if(!sbFilters[filter].includes(val)) sbFilters[filter].push(val);
+  } else {
+    sbFilters[filter] = sbFilters[filter].filter(function(v){ return v!==val; });
+  }
+  // Also sync the matching desktop sidebar pill
+  document.querySelectorAll("#filterSidebar .sb-pill[data-filter='"+filter+"'][data-val='"+val+"']").forEach(function(p){
+    p.classList.toggle("active", sbFilters[filter].includes(val));
+  });
+  updateMobFilterBtn();
+  applySidebarFilters();
+}
+
+/* Mobile sort */
+function onMobSort(){
+  var val = document.getElementById("priceSortMobile").value;
+  sbFilters.sort = val;
+  // sync desktop sidebar sort
+  var ds = document.getElementById("priceSortSidebar");
+  if(ds) ds.value = val;
+  updateMobFilterBtn();
+  applySidebarFilters();
+}
+
+/* Update the filter button badge */
+function updateMobFilterBtn(){
+  var count = countActiveFilters();
+  var btn   = document.getElementById("mobFilterBtn");
+  var badge = document.getElementById("mobFilterCount");
+  if(!btn) return;
+  if(count > 0){
+    btn.classList.add("has-filters");
+    badge.textContent = count;
+    badge.style.display = "inline-block";
+    // also update desktop badge
+    var sb = document.getElementById("sbActiveCount");
+    if(sb){ sb.textContent=count; sb.classList.add("show"); }
+  } else {
+    btn.classList.remove("has-filters");
+    badge.style.display = "none";
+    var sb = document.getElementById("sbActiveCount");
+    if(sb){ sb.classList.remove("show"); }
+  }
+}
+var sbFilters = {
+  fuel:         [],
+  transmission: [],
+  owner:        [],
+  priceRange:   [],
+  kmMax:        300000,
+  yearMin:      2000,
+  yearMax:      2025,
+  sort:         "default"
+};
+
+/* Build dynamic pill lists from inventory data */
+function buildSidebarPills(){
+  if(!data.inventory) return;
+  var fuels = [...new Set(data.inventory.map(v=>(v.fuelType||"").trim()).filter(Boolean))].sort();
+  var trans = [...new Set(data.inventory.map(v=>(v.transmission||"").trim()).filter(Boolean))].sort();
+
+  var fuelEl = document.getElementById("sbFuel");
+  var transEl = document.getElementById("sbTransmission");
+  if(!fuelEl || !transEl) return;
+
+  fuelEl.innerHTML = fuels.map(f=>
+    `<button class="sb-pill" data-filter="fuel" data-val="${f}" onclick="togglePill(this)">${f}</button>`
+  ).join("");
+  transEl.innerHTML = trans.map(t=>
+    `<button class="sb-pill" data-filter="transmission" data-val="${t}" onclick="togglePill(this)">${t}</button>`
+  ).join("");
+}
+
+/* Toggle a pill on/off */
+function togglePill(btn){
+  btn.classList.toggle("active");
+  var filter = btn.getAttribute("data-filter");
+  var val    = btn.getAttribute("data-val");
+  if(!sbFilters[filter]) sbFilters[filter] = [];
+  if(btn.classList.contains("active")){
+    if(!sbFilters[filter].includes(val)) sbFilters[filter].push(val);
+  } else {
+    sbFilters[filter] = sbFilters[filter].filter(function(v){ return v!==val; });
+  }
+  applySidebarFilters();
+}
+
+/* Range slider change â€” KM only (year now uses dual range) */
+function onRangeChange(rangeId, labelId, fmt){
+  var val = document.getElementById(rangeId).value;
+  document.getElementById(labelId).textContent = fmt(val);
+  if(rangeId==="sbKmRange" || rangeId==="mobKmRange") sbFilters.kmMax = Number(val);
+  // Sync paired KM slider
+  var paired      = {sbKmRange:"mobKmRange", mobKmRange:"sbKmRange"};
+  var pairedLabel = {sbKmRange:"mobKmVal",   mobKmRange:"sbKmVal"};
+  var p  = document.getElementById(paired[rangeId]);
+  var pl = document.getElementById(pairedLabel[rangeId]);
+  if(p)  p.value = val;
+  if(pl) pl.textContent = fmt(val);
+  applySidebarFilters();
+}
+
+/* â”€â”€ DUAL YEAR RANGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function onDualYear(side, prefix){
+  var minEl = document.getElementById(prefix+"YearMin");
+  var maxEl = document.getElementById(prefix+"YearMax");
+  var minV  = parseInt(minEl.value);
+  var maxV  = parseInt(maxEl.value);
+  // prevent handles crossing
+  if(minV >= maxV){
+    if(side==="min"){ minEl.value = maxV-1; minV = maxV-1; }
+    else            { maxEl.value = minV+1; maxV = minV+1; }
+  }
+  sbFilters.yearMin = minV;
+  sbFilters.yearMax = maxV;
+  // update label
+  var lbl = (prefix==="sb") ? "sbYearVal" : "mobYearVal";
+  document.getElementById(lbl).textContent = minV+" â€“ "+maxV;
+  // update fill
+  updateDualFill(prefix+"YearFill", minEl, maxEl);
+  // sync paired slider set
+  var other  = (prefix==="sb") ? "mob" : "sb";
+  var oMin   = document.getElementById(other+"YearMin");
+  var oMax   = document.getElementById(other+"YearMax");
+  var oLbl   = document.getElementById(other+"YearVal");
+  if(oMin) oMin.value = minV;
+  if(oMax) oMax.value = maxV;
+  if(oLbl) oLbl.textContent = minV+" â€“ "+maxV;
+  updateDualFill(other+"YearFill", oMin, oMax);
+  applySidebarFilters();
+}
+
+function updateDualFill(fillId, minEl, maxEl){
+  var fill = document.getElementById(fillId);
+  if(!fill || !minEl || !maxEl) return;
+  var lo   = parseInt(minEl.min), hi = parseInt(minEl.max);
+  var minV = parseInt(minEl.value), maxV = parseInt(maxEl.value);
+  // Browser offsets the thumb inward slightly at 0% and 100% â€” compensate
+  var thumbHalf = 9; // px (half of 18px thumb)
+  var wrap = fill.closest ? fill.closest(".dual-range-wrap") : fill.parentElement.parentElement;
+  var w    = wrap ? wrap.offsetWidth : 180;
+  var range = hi - lo;
+  var leftPct  = (minV - lo) / range;
+  var rightPct = (maxV - lo) / range;
+  // Adjust for thumb offset
+  var leftPx  = leftPct  * (w - 2*thumbHalf) + thumbHalf;
+  var rightPx = rightPct * (w - 2*thumbHalf) + thumbHalf;
+  fill.style.left  = leftPx  + "px";
+  fill.style.width = (rightPx - leftPx) + "px";
+}
+
+/* Sidebar sort change */
+function onSidebarSort(){
+  sbFilters.sort = document.getElementById("priceSortSidebar").value;
+  // keep toolbar select in sync on mobile
+  var mob = document.getElementById("priceSort");
+  if(mob) mob.value = sbFilters.sort;
+  applySidebarFilters();
+}
+
+/* Count active filters for the badge */
+function countActiveFilters(){
+  var n = sbFilters.fuel.length + sbFilters.transmission.length + sbFilters.owner.length + sbFilters.priceRange.length;
+  if(sbFilters.kmMax < 300000)  n++;
+  if(sbFilters.yearMin > 2000 || sbFilters.yearMax < 2025) n++;
+  if(sbFilters.sort !== "default") n++;
+  return n;
+}
+
+/* Main filter + sort engine â€” runs on every change */
+function applySidebarFilters(){
+  // Update active count badge
+  var count = countActiveFilters();
+  var badge = document.getElementById("sbActiveCount");
+  if(badge){
+    badge.textContent = count;
+    badge.classList.toggle("show", count > 0);
+  }
+  updateMobFilterBtn();
+
+  if(!data.inventory) return;
+
+  var inv = (data.inventory||[]).slice();
+
+  // Text search
+  var kw = (document.getElementById("localSearch")||{}).value||"";
+  kw = kw.toLowerCase().trim();
+
+  // Filter
+  inv = inv.filter(function(v){
+    // keyword search
+    if(kw && !(v.vehicleId+" "+v.makeModel+" "+v.year+" "+v.km).toLowerCase().includes(kw)) return false;
+    // price range (OR logic â€” any selected range matches)
+    if(sbFilters.priceRange.length){
+      var priceMatch = sbFilters.priceRange.some(function(r){
+        var parts = r.split("-"); var mn = Number(parts[0]); var mx = Number(parts[1]);
+        return v.price >= mn && v.price <= mx;
+      });
+      if(!priceMatch) return false;
+    }
+    // fuel
+    if(sbFilters.fuel.length && !sbFilters.fuel.some(function(f){ return (v.fuelType||"").toLowerCase()===f.toLowerCase(); })) return false;
+    // transmission
+    if(sbFilters.transmission.length && !sbFilters.transmission.some(function(t){ return (v.transmission||"").toLowerCase()===t.toLowerCase(); })) return false;
+    // owner
+    if(sbFilters.owner.length && !sbFilters.owner.includes(String(v.ownerNumber||""))) return false;
+    // km
+    if(sbFilters.kmMax < 300000 && Number(v.km||0) > sbFilters.kmMax) return false;
+    // year (both sides)
+    var yr = Number(v.yearOfMfg||v.year||0);
+    if(sbFilters.yearMin > 2000 && yr < sbFilters.yearMin) return false;
+    if(sbFilters.yearMax < 2025 && yr > sbFilters.yearMax) return false;
+    return true;
+  });
+
+  // Sort
+  var sort = sbFilters.sort;
+  // also check toolbar sort on mobile
+  var mobSort = (document.getElementById("priceSort")||{}).value||"default";
+  if(sort==="default") sort = mobSort;
+  if(sort==="low")  inv.sort(function(a,b){ return a.price-b.price; });
+  if(sort==="high") inv.sort(function(a,b){ return b.price-a.price; });
+  if(sort==="kmLow") inv.sort(function(a,b){ return Number(a.km||0)-Number(b.km||0); });
+  if(sort==="kmHigh") inv.sort(function(a,b){ return Number(b.km||0)-Number(a.km||0); });
+  if(sort==="yearNew") inv.sort(function(a,b){ return Number(b.yearOfMfg||b.year||0)-Number(a.yearOfMfg||a.year||0); });
+  if(sort==="yearOld") inv.sort(function(a,b){ return Number(a.yearOfMfg||a.year||0)-Number(b.yearOfMfg||b.year||0); });
+
+  renderFilteredCards(inv);
+}
+
+/* Render only a filtered subset without touching data.inventory */
+function renderFilteredCards(inv){
+  var container = document.getElementById("stock");
+  var today = todayDate();
+  var bids = data.allBids||[];
+  var dealerBids = bids.filter(function(b){ return b.mobile==dealer.mobile; });
+  var listedIds = (data.inventory||[]).map(function(v){ return v.vehicleId; });
+  var bidVIds = [...new Set(dealerBids.filter(function(b){ return listedIds.includes(b.vehicleId); }).map(function(b){ return b.vehicleId; }))];
+  var total = inv.length;
+
+  if(!total){
+    container.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;font-weight:600;">No vehicles match the selected filters.</div>';
+    return;
+  }
+
+  var html="";
+  inv.forEach(function(v,index){
+    vehicleGalleryMap[v.vehicleId]=v.photos||[];
+    var vBids=bids.filter(function(b){ return b.vehicleId==v.vehicleId; });
+    var highest=vBids.length?Math.max.apply(null,vBids.map(function(b){ return b.amount||0; })):0;
+    var myBid=dealerBids.find(function(b){ return b.vehicleId==v.vehicleId; });
+    var defBid=myBid?myBid.amount:v.price;
+    var photos=v.photos||[];
+    var firstPhoto=photos.length?photos[0]:"https://via.placeholder.com/800x400?text=No+Image";
+    var thumbsHtml="";
+    photos.forEach(function(p,pi){
+      thumbsHtml+=`<img src="${p}" class="v-thumb${pi===0?' active':''}" onerror="this.style.display='none'" onclick="setCardImage('${v.vehicleId}',${pi},'${p}',this)">`;
+    });
+    var hasBid=bidVIds.includes(v.vehicleId);
+    var bulk=v||{};
+    var regPrefix = formatRegistrationPrefix(bulk.registrationNo);
+    function detailItem(label,value,cls){
+      if(!value && value!==0) return "";
+      return `<div class="v-detail-item"><span class="v-detail-label">${label}</span><span class="v-detail-value${cls?' '+cls:''}">${value}</span></div>`;
+    }
+    var ownerLabel=bulk.ownerNumber?(bulk.ownerNumber==1?"1st Owner":bulk.ownerNumber==2?"2nd Owner":bulk.ownerNumber==3?"3rd Owner":bulk.ownerNumber+" Owner"):"";
+    var bulkDetailsHtml=[
+      detailItem("Color",bulk.color,""),
+      detailItem("Fuel Type",bulk.fuelType,""),
+      detailItem("Transmission",bulk.transmission,""),
+      detailItem("Owner",ownerLabel,""),
+      detailItem("Insurance Expiry",bulk.insuranceEndDate,""),
+      detailItem("RC Date",bulk.rcRegnDate,""),
+    ].filter(Boolean).join("");
+    var hasBulkData=bulkDetailsHtml.trim().length>0;
+
+    html+=`
+    <div class="v-card" style="animation-delay:${index*40}ms" id="vcard-${v.vehicleId}">
+      <div class="v-img-wrap" onclick="openOverlay('${v.vehicleId}')">
+        <img id="big${v.vehicleId}" class="main-img" src="${firstPhoto}" onerror="this.src='https://via.placeholder.com/800x400?text=No+Image'">
+        <div class="v-badge-id">${v.vehicleId}</div>
+        <div class="v-badge-num">${index+1} / ${total}</div>
+        ${hasBid?`<div class="v-badge-bid">Bid Submitted</div>`:""}
+      </div>
+      ${photos.length>1?`<div class="v-thumb-row" id="thumbs-${v.vehicleId}">${thumbsHtml}</div>`:""}
+      <div class="v-body">
+        <div class="v-title">${v.makeModel}</div>
+        <div class="v-meta">
+          <div class="v-meta-item">Year : <strong>${v.year}</strong></div>
+          <div class="v-meta-item">KM : <strong>${Number(v.km).toLocaleString("en-IN")}</strong></div>
+          ${regPrefix?`<div class="v-meta-item">Reg : <strong>${regPrefix}</strong></div>`:""}
+        </div>
+        ${hasBulkData?`<div class="v-detail-section"><div class="v-detail-header" onclick="toggleDetail(this)">Vehicle Details &nbsp;<span class="arrow">â–¼</span></div><div class="v-detail-body"><div class="v-detail-grid">${bulkDetailsHtml}</div></div></div>`:""}
+        <div class="v-price-row">
+          <span class="v-start-price">Start: ${fmtINR(v.price)}</span>
+          <span id="highest-${v.vehicleId}" class="v-highest-badge" ${highest>0?'':'style="display:none"'}>Highest: ${fmtINR(highest)}</span>
+          ${myBid?`<span id="mybid-${v.vehicleId}" class="v-mybid-badge ${highest>myBid.amount?'v-mybid-outbid':'v-mybid-leading'}">Your Bid: ${fmtINR(myBid.amount)}</span>`:`<span id="mybid-${v.vehicleId}" class="v-mybid-badge" style="display:none"></span>`}
+        </div>
+        <div class="v-timer v-timer-open" id="timer-${v.vehicleId}">
+          Closes 8:00 PM &nbsp;<span class="v-timer-countdown" id="tc-${v.vehicleId}">--:--:--</span>
+        </div>
+        <div class="v-bid-section" id="bidform-${v.vehicleId}">
+          <div class="v-bid-label">Your Bid Amount</div>
+          <div class="v-bid-controls">
+            <button class="v-bid-btn v-bid-dec" onclick="decrease('${v.vehicleId}')">-</button>
+            <input readonly id="bid${v.vehicleId}" value="${defBid}" data-start="${v.price}" class="v-bid-input">
+            <button class="v-bid-btn v-bid-inc" onclick="increase('${v.vehicleId}')">+</button>
+          </div>
+          <div class="v-date-label">Expected Date of Payment</div>
+          <input type="date" id="pay${v.vehicleId}" value="" min="${today}" required onkeydown="return false" class="v-date-input">
+          <textarea id="remarks${v.vehicleId}" class="v-remarks" placeholder="Remarks (optional)"></textarea>
+          <button onclick="submitBid(event,'${v.vehicleId}')" class="btn-submit-bid">Submit Bid</button>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML=html;
+  buildSnapshot(data);
+  initThumbDrag();
+  updateAuctionTimer();
+}
+
+/* Search box â€” triggers sidebar filter engine */
+function filterVehicles(){
+  applySidebarFilters();
+}
+
+/* Reset all filters */
+function clearAllFilters(){
+  sbFilters = { fuel:[], transmission:[], owner:[], priceRange:[], kmMax:300000, yearMin:2000, yearMax:2025, sort:"default" };
+  document.querySelectorAll(".sb-pill.active").forEach(function(p){ p.classList.remove("active"); });
+  // Desktop KM slider
+  var km = document.getElementById("sbKmRange");
+  if(km){ km.value=300000; document.getElementById("sbKmVal").textContent="Any"; }
+  // Desktop year dual sliders
+  var syMin = document.getElementById("sbYearMin"), syMax = document.getElementById("sbYearMax");
+  if(syMin){ syMin.value=2000; } if(syMax){ syMax.value=2025; }
+  document.getElementById("sbYearVal").textContent="2000 â€“ 2025";
+  updateDualFill("sbYearFill", syMin, syMax);
+  // Mobile KM slider
+  var mkm = document.getElementById("mobKmRange");
+  if(mkm){ mkm.value=300000; document.getElementById("mobKmVal").textContent="Any"; }
+  // Mobile year dual sliders
+  var myMin = document.getElementById("mobYearMin"), myMax = document.getElementById("mobYearMax");
+  if(myMin){ myMin.value=2000; } if(myMax){ myMax.value=2025; }
+  document.getElementById("mobYearVal").textContent="2000 â€“ 2025";
+  updateDualFill("mobYearFill", myMin, myMax);
+  // Sorts
+  var ss = document.getElementById("priceSortSidebar");  if(ss) ss.value="default";
+  var ms = document.getElementById("priceSortMobile");   if(ms) ms.value="default";
+  var tb = document.getElementById("priceSort");         if(tb) tb.value="default";
+  updateMobFilterBtn();
+  applySidebarFilters();
+}
+
+/* â”€â”€ TOGGLE DETAIL PANEL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function toggleDetail(header){
+  header.classList.toggle("open");
+  const body=header.nextElementSibling;
+  body.classList.toggle("open");
+}
+
+/* â”€â”€ AUCTION TIMER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function scheduleTimerReset(){
+  const now=new Date(),reset=new Date();
+  reset.setHours(11,0,0,0);
+  if(now>=reset) reset.setDate(reset.getDate()+1);
+  setTimeout(function(){
+    syncAuctionState();
+    scheduleTimerReset();
+  },reset-now);
+}
+
+function updateAuctionTimer(){
+  const now=new Date(), end=new Date();
+  end.setHours(20,0,0,0);
+  if(!testingMode){
+    syncAuctionState(now);
+  }
+  const closed=!auctionOpen;
+
+  document.querySelectorAll("[id^='timer-']").forEach(function(box){
+    const vid=box.id.replace("timer-","");
+    const cd=document.getElementById("tc-"+vid);
+    const form=document.getElementById("bidform-"+vid);
+
+    if(closed){
+      box.className="v-timer v-timer-closed";
+      box.innerHTML="Auction Closed for Today";
+      if(form) form.style.display="none";
+      return;
+    }
+    const diff=end-now;
+    const warn=diff<=30*60*1000;
+    box.className="v-timer "+(warn?"v-timer-warn":"v-timer-open");
+    const h=String(Math.floor(diff/3600000)).padStart(2,"0");
+    const m=String(Math.floor((diff%3600000)/60000)).padStart(2,"0");
+    const s=String(Math.floor((diff%60000)/1000)).padStart(2,"0");
+    if(cd) cd.textContent=h+":"+m+":"+s;
+  });
+}
+setInterval(updateAuctionTimer,1000);
+
+/* â”€â”€ GALLERY OVERLAY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+var currentPanX=0, currentPanY=0;
+
+function applyTransform(){
+  document.getElementById("overlayImg").style.transform=
+    "rotate("+currentRotation+"deg) scale("+currentZoom+") translate("+currentPanX+"px,"+currentPanY+"px)";
+}
+
+function resetTransform(){
+  currentRotation=0; currentZoom=1; currentPanX=0; currentPanY=0;
+  applyTransform();
+}
+
+function openOverlay(vid){
+  currentImages=vehicleGalleryMap[vid]||[];
+  if(!currentImages.length) return;
+  resetTransform();
+  previousScrollY=window.scrollY;
+
+  const startIndex=vehicleActiveIndex[vid]||0;
+  currentImageIndex=startIndex;
+
+  document.getElementById("overlayImg").src=currentImages[startIndex];
+  buildGalleryThumbs();
+  syncGalleryThumbs();
+  document.getElementById("overlayCtr").textContent=(startIndex+1)+" / "+currentImages.length;
+  document.getElementById("galleryOverlay").classList.add("active");
+  document.body.style.overflow="hidden";
+  window.top.postMessage("OPEN_MODAL","*");
+}
+
+function buildGalleryThumbs(){
+  const bar=document.getElementById("galleryThumbsBar");
+  bar.innerHTML="";
+  currentImages.forEach(function(p,i){
+    const t=document.createElement("img");
+    t.src=p; t.className="gallery-thumb"+(i===0?" active":"");
+    t.onerror=function(){ this.style.display="none"; };
+    t.onclick=function(){ jumpToImage(i); };
+    bar.appendChild(t);
+  });
+}
+
+function syncGalleryThumbs(){
+  document.querySelectorAll(".gallery-thumb").forEach(function(t,i){
+    t.classList.toggle("active",i===currentImageIndex);
+  });
+  const bar=document.getElementById("galleryThumbsBar");
+  const active=bar.querySelector(".gallery-thumb.active");
+  if(active) active.scrollIntoView({inline:"center",behavior:"smooth",block:"nearest"});
+}
+
+function jumpToImage(i){
+  currentImageIndex=i; resetTransform();
+  const img=document.getElementById("overlayImg");
+  img.style.opacity="0";
+  setTimeout(function(){ img.src=currentImages[i]; img.style.opacity="1"; },100);
+  img.style.transition="opacity .15s";
+  document.getElementById("overlayCtr").textContent=(i+1)+" / "+currentImages.length;
+  syncGalleryThumbs();
+}
+
+function closeOverlay(){
+  document.getElementById("galleryOverlay").classList.remove("active");
+  document.getElementById("overlayImg").src="";
+  document.body.style.overflow="";
+  window.top.postMessage("CLOSE_MODAL","*");
+  setTimeout(function(){ window.scrollTo({top:previousScrollY,behavior:"instant"}); },50);
+}
+
+function nextImage(){
+  if(currentImageIndex<currentImages.length-1) jumpToImage(currentImageIndex+1);
+}
+function prevImage(){
+  if(currentImageIndex>0) jumpToImage(currentImageIndex-1);
+}
+
+function rotateImg(deg){
+  currentRotation+=deg;
+  applyTransform();
+}
+
+/* â”€â”€ DRAG TO PAN (mouse) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+var isDragging=false, dragStartX=0, dragStartY=0, panStartX=0, panStartY=0;
+var wrap=document.getElementById("galleryImgWrap");
+
+wrap.addEventListener("mousedown",function(e){
+  if(e.button!==0) return;
+  isDragging=true; wrap.classList.add("dragging");
+  dragStartX=e.clientX; dragStartY=e.clientY;
+  panStartX=currentPanX; panStartY=currentPanY;
+  e.preventDefault();
+});
+document.addEventListener("mousemove",function(e){
+  if(!isDragging) return;
+  currentPanX=panStartX+(e.clientX-dragStartX)/currentZoom;
+  currentPanY=panStartY+(e.clientY-dragStartY)/currentZoom;
+  applyTransform();
+});
+document.addEventListener("mouseup",function(){
+  if(!isDragging) return;
+  isDragging=false; wrap.classList.remove("dragging");
+});
+
+/* â”€â”€ SWIPE (touch â€” single finger = swipe next/prev OR pan when zoomed) â”€â”€ */
+var swipeStartX=0, swipeStartY=0, touchPanStartX=0, touchPanStartY=0;
+var isTouchPanning=false;
+
+document.getElementById("galleryOverlay").addEventListener("touchstart",function(e){
+  if(e.touches.length===1){
+    swipeStartX=e.touches[0].clientX; swipeStartY=e.touches[0].clientY;
+    touchPanStartX=currentPanX; touchPanStartY=currentPanY;
+    isTouchPanning=false;
+  }
+},{passive:true});
+
+document.getElementById("galleryOverlay").addEventListener("touchmove",function(e){
+  if(e.touches.length===1 && currentZoom>1){
+    // pan when zoomed in
+    isTouchPanning=true;
+    currentPanX=touchPanStartX+(e.touches[0].clientX-swipeStartX)/currentZoom;
+    currentPanY=touchPanStartY+(e.touches[0].clientY-swipeStartY)/currentZoom;
+    applyTransform();
+    e.preventDefault();
+  }
+},{passive:false});
+
+document.getElementById("galleryOverlay").addEventListener("touchend",function(e){
+  if(isTouchPanning){ isTouchPanning=false; return; }
+  if(e.changedTouches.length===1){
+    const dx=e.changedTouches[0].clientX-swipeStartX;
+    const dy=e.changedTouches[0].clientY-swipeStartY;
+    if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>45){
+      dx<0?nextImage():prevImage();
+    }
+  }
+},{passive:true});
+
+/* Keyboard nav */
+document.addEventListener("keydown",function(e){
+  if(!document.getElementById("galleryOverlay").classList.contains("active")) return;
+  if(e.key==="ArrowRight") nextImage();
+  if(e.key==="ArrowLeft")  prevImage();
+  if(e.key==="Escape")     closeOverlay();
+});
+
+/* Mouse wheel zoom */
+document.getElementById("galleryOverlay").addEventListener("wheel",function(e){
+  e.preventDefault();
+  currentZoom=Math.min(5,Math.max(0.5,currentZoom+(e.deltaY>0?-0.1:0.1)));
+  applyTransform();
+},{passive:false});
+
+/* Pinch zoom (touch) */
+var pinchStartDist=0, pinchStartZoom=1;
+document.getElementById("overlayImg").addEventListener("touchstart",function(e){
+  if(e.touches.length===2){
+    pinchStartDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
+                              e.touches[0].clientY-e.touches[1].clientY);
+    pinchStartZoom=currentZoom; e.preventDefault();
+  }
+},{passive:false});
+document.getElementById("overlayImg").addEventListener("touchmove",function(e){
+  if(e.touches.length===2){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
+                       e.touches[0].clientY-e.touches[1].clientY);
+    currentZoom=Math.min(5,Math.max(0.5,pinchStartZoom*(d/pinchStartDist)));
+    applyTransform();
+    e.preventDefault();
+  }
+},{passive:false});
+
+/* â”€â”€ SUBMIT BID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function submitBid(event,vehicleId){
+  event.preventDefault();
+  const bidAmount=Number(document.getElementById("bid"+vehicleId).value);
+  const payDate=document.getElementById("pay"+vehicleId).value;
+  const remarks=document.getElementById("remarks"+vehicleId).value;
+  if(!bidAmount||bidAmount<=0){ alert("Please enter a valid Bid Amount."); return; }
+  if(!payDate){ alert("Expected Date of Payment is required."); return; }
+
+  document.getElementById("confirmBidText").innerHTML=
+    "<strong>Vehicle ID:</strong> "+vehicleId+"<br>"+
+    "<strong>Bid Amount:</strong> "+fmtINR(bidAmount)+"<br>"+
+    "<strong>Payment Date:</strong> "+payDate+"<br><br>"+
+    "Are you sure you want to submit this bid?";
+
+  const modal=new bootstrap.Modal(document.getElementById("confirmBidModal"));
+  modal.show();
+  document.getElementById("confirmBidBtn").onclick=function(){
+    processBid(vehicleId,bidAmount,payDate,remarks,modal);
+  };
+}
+
+function processBid(vehicleId,amount,payDate,remarks,modal){
+  const btn=document.getElementById("confirmBidBtn");
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+
+  google.script.run
+    .withSuccessHandler(function(r){
+      btn.disabled=false; btn.textContent="Confirm & Submit";
+      if(r.success){ modal.hide(); loadStock(); }
+      alert(r.message);
+    })
+    .withFailureHandler(function(err){
+      btn.disabled=false; btn.textContent="Confirm & Submit";
+      alert(err.message);
+    })
+    .submitBid({
+      vehicleId,dealerId:dealer.dealerId,dealerName:dealer.dealerName,
+      mobile:dealer.mobile,amount,paymentDate:payDate,remarks
+    });
+}
+
+/* â”€â”€ SUMMARY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function openSummary(){
+  document.getElementById("summaryOverlay").classList.add("active");
+  document.getElementById("summaryContent").innerHTML="";
+  document.getElementById("summaryLoader").style.display="block";
+
+  google.script.run
+    .withSuccessHandler(function(rows){
+      document.getElementById("summaryLoader").style.display="none";
+      renderSummary(rows);
+    })
+    .withFailureHandler(function(err){
+      document.getElementById("summaryLoader").style.display="none";
+      document.getElementById("summaryContent").innerHTML=
+        '<p style="color:red;text-align:center;">Error: '+err.message+'</p>';
+    })
+    .getDealerSummary(dealer.mobile);
+}
+
+function closeSummary(){
+  document.getElementById("summaryOverlay").classList.remove("active");
+}
+
+var summaryAllRows = [];  // store all rows for filtering
+
+function renderSummary(rows){
+  summaryAllRows = rows || [];
+  if(!summaryAllRows.length){
+    document.getElementById("summaryContent").innerHTML=
+      '<p style="text-align:center;color:#888;padding:30px;">No bids found.</p>';
+    document.getElementById("summaryStats").innerHTML="";
+    return;
+  }
+  const total   = summaryAllRows.length;
+  const leading = summaryAllRows.filter(r=>r.isLeading).length;
+  const outbid  = total - leading;
+
+  document.getElementById("summaryStats").innerHTML=
+    `<div class="sum-stat" id="sstat-all" onclick="filterSummary('all')">
+       <div class="sv">${total}</div><div class="sl">Total Bids</div>
+     </div>`+
+    `<div class="sum-stat" id="sstat-leading" onclick="filterSummary('leading')">
+       <div class="sv" style="color:var(--green)">${leading}</div><div class="sl">Leading</div>
+     </div>`+
+    `<div class="sum-stat" id="sstat-outbid" onclick="filterSummary('outbid')">
+       <div class="sv" style="color:var(--red)">${outbid}</div><div class="sl">Outbid</div>
+     </div>`;
+
+  renderSummaryTable(summaryAllRows);
+}
+
+function filterSummary(type){
+  // Toggle: clicking active stat again resets to all
+  var current = document.querySelector(".sum-stat.active");
+  var isSame  = current && current.id === "sstat-"+type;
+
+  document.querySelectorAll(".sum-stat").forEach(s=>s.classList.remove("active"));
+
+  var filtered;
+  if(isSame || type==="all"){
+    filtered = summaryAllRows;
+    document.getElementById("sstat-all").classList.add("active");
+  } else {
+    document.getElementById("sstat-"+type).classList.add("active");
+    filtered = summaryAllRows.filter(function(r){
+      return type==="leading" ? r.isLeading : !r.isLeading;
+    });
+  }
+  renderSummaryTable(filtered);
+}
+
+function renderSummaryTable(rows){
+  if(!rows.length){
+    document.getElementById("summaryContent").innerHTML=
+      '<p style="text-align:center;color:#888;padding:20px;">No bids in this category.</p>';
+    return;
+  }
+  let h=`<table class="sum-table"><thead><tr>
+    <th>Bid ID</th><th>Submitted</th><th>Vehicle</th><th>Make</th>
+    <th>My Bid</th><th>Highest</th><th>Status</th><th>Pay Date</th><th>Remarks</th>
+  </tr></thead><tbody>`;
+  rows.forEach(function(r){
+    const st=r.isLeading
+      ?'<span class="sum-lead">Leading</span>'
+      :'<span class="sum-out">Outbid</span>';
+    h+=`<tr>
+      <td data-label="Bid ID">${r.bidId}</td>
+      <td data-label="Submitted">${r.timestamp}</td>
+      <td data-label="Vehicle">${r.vehicleId}</td>
+      <td data-label="Make">${r.makeModel}</td>
+      <td data-label="My Bid">${fmtINR(r.myBid)}</td>
+      <td data-label="Highest">${fmtINR(r.highestBid)}</td>
+      <td data-label="Status">${st}</td>
+      <td data-label="Pay Date">${r.payDate}</td>
+      <td data-label="Remarks">${r.remarks||"-"}</td>
+    </tr>`;
+  });
+  h+="</tbody></table>";
+  document.getElementById("summaryContent").innerHTML=h;
+}
+
+/* â”€â”€ PULL TO REFRESH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+var pullStartY=0,isPulling=false;
+document.addEventListener("touchstart",function(e){
+  if(window.scrollY===0){ pullStartY=e.touches[0].clientY; isPulling=true; }
+},{passive:true});
+document.addEventListener("touchmove",function(e){
+  if(!isPulling) return;
+  if(e.touches[0].clientY-pullStartY>120){ isPulling=false; if(dealer.mobile) loadStock(); }
+},{passive:true});
+document.addEventListener("touchend",function(){ isPulling=false; },{passive:true});
+
+/* â”€â”€ LOAD STOCK (full render â€” login + post-bid-submit only) â”€â”€â”€ */
+function loadStock(){
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r||!r.inventory){ alert("Data load failed. Please refresh."); return; }
+      data=r;
+      buildSnapshot(r);
+      renderStock();
+    })
+    .withFailureHandler(function(err){ alert("Error loading data: "+err.message); })
+    .getData();
+}
+
+/* â”€â”€ SNAPSHOT helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+// snapshot: { vehicleId -> { highest, status } }
+var lastSnapshot = {};
+
+function buildSnapshot(d){
+  var snap = {};
+  var bids = d.allBids||[];
+  (d.inventory||[]).forEach(function(v){
+    var vBids = bids.filter(function(b){ return b.vehicleId==v.vehicleId; });
+    var highest = vBids.length ? Math.max.apply(null,vBids.map(function(b){ return b.amount||0; })) : 0;
+    snap[v.vehicleId] = { highest: highest, status: "available" };
+  });
+  // vehicles that were available before but are gone now get status "removed"
+  Object.keys(lastSnapshot).forEach(function(vid){
+    if(!snap[vid]) snap[vid] = { highest: lastSnapshot[vid].highest, status: "removed" };
+  });
+  lastSnapshot = snap;
+}
+
+/* â”€â”€ SILENT POLL â€” only patch changed cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function silentPoll(){
+  if(!dealer.mobile) return;
+  google.script.run
+    .withSuccessHandler(function(r){
+      if(!r||!r.inventory) return;
+
+      var bids     = r.allBids||[];
+      var changed  = [];   // vids that need a card update
+      var removed  = [];   // vids no longer available
+
+      // Build new snapshot and compare
+      var newSnap = {};
+      r.inventory.forEach(function(v){
+        var vBids   = bids.filter(function(b){ return b.vehicleId==v.vehicleId; });
+        var highest = vBids.length ? Math.max.apply(null,vBids.map(function(b){ return b.amount||0; })) : 0;
+        newSnap[v.vehicleId] = { highest: highest, status: "available" };
+
+        var old = lastSnapshot[v.vehicleId];
+        if(!old){
+          // brand-new vehicle appeared â€” full re-render needed
+          changed.push("__NEW__");
+        } else if(old.highest !== highest){
+          changed.push(v.vehicleId);
+        }
+      });
+
+      // Check if any previously available vehicle is now gone
+      Object.keys(lastSnapshot).forEach(function(vid){
+        if(!newSnap[vid] && lastSnapshot[vid].status!=="removed"){
+          removed.push(vid);
+        }
+      });
+
+      // If new vehicles appeared do a full re-render once
+      if(changed.indexOf("__NEW__") > -1){
+        data = r;
+        lastSnapshot = newSnap;
+        renderStock();
+        return;
+      }
+
+      // Remove unavailable vehicle cards silently
+      removed.forEach(function(vid){
+        var card = document.getElementById("vcard-"+vid);
+        if(card){
+          card.style.transition="opacity .4s, transform .4s";
+          card.style.opacity="0"; card.style.transform="scale(.95)";
+          setTimeout(function(){ card.remove(); },420);
+        }
+        delete newSnap[vid];
+      });
+
+      // Patch only the changed cards
+      changed.forEach(function(vid){
+        var newV = r.inventory.find(function(v){ return v.vehicleId==vid; });
+        if(!newV) return;
+
+        var dealerBids  = bids.filter(function(b){ return b.mobile==dealer.mobile; });
+        var vBids       = bids.filter(function(b){ return b.vehicleId==vid; });
+        var highest     = vBids.length ? Math.max.apply(null,vBids.map(function(b){ return b.amount||0; })) : 0;
+        var myBid       = dealerBids.find(function(b){ return b.vehicleId==vid; });
+
+        // Update highest badge
+        var hEl = document.getElementById("highest-"+vid);
+        if(hEl){
+          if(highest>0){
+            hEl.textContent="Highest: "+fmtINR(highest);
+            hEl.style.display="";
+            // flash animation
+            hEl.style.transition="background .3s";
+            hEl.style.background="#fde68a";
+            setTimeout(function(){ hEl.style.background=""; },800);
+          } else {
+            hEl.style.display="none";
+          }
+        }
+
+        // Update my-bid badge
+        var mEl = document.getElementById("mybid-"+vid);
+        if(mEl && myBid){
+          var leading = highest <= myBid.amount;
+          mEl.textContent = "Your Bid: "+fmtINR(myBid.amount);
+          mEl.className   = "v-mybid-badge "+(leading?"v-mybid-leading":"v-mybid-outbid");
+        }
+      });
+
+      // Update bid count banner if anything changed
+      if(changed.length || removed.length){
+        data = r;
+        var dealerBids = bids.filter(function(b){ return b.mobile==dealer.mobile; });
+        var listedIds  = r.inventory.map(function(v){ return v.vehicleId; });
+        var bidVIds    = [...new Set(dealerBids.filter(function(b){ return listedIds.includes(b.vehicleId); }).map(function(b){ return b.vehicleId; }))];
+        var banner     = document.getElementById("bidCountBanner");
+        if(banner) banner.textContent = bidVIds.length>0 ? "You have active bids on "+bidVIds.length+" vehicle(s)" : "";
+      }
+
+      lastSnapshot = newSnap;
+    })
+    .withFailureHandler(function(){ /* silent â€” ignore poll errors */ })
+    .getData();
+}
+
+/* â”€â”€ AUTO REFRESH â€” silent poll every 30s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+setInterval(silentPoll, 30000);
+
+/* â”€â”€ DRAG-TO-SCROLL THUMBNAILS (desktop) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+function initThumbDrag(){
+  document.querySelectorAll(".v-thumb-row").forEach(function(row){
+    let isDown=false, startX=0, scrollLeft=0;
+    row.addEventListener("mousedown",function(e){
+      isDown=true; row.classList.add("dragging");
+      startX=e.pageX-row.offsetLeft; scrollLeft=row.scrollLeft;
+    });
+    row.addEventListener("mouseleave",function(){ isDown=false; row.classList.remove("dragging"); });
+    row.addEventListener("mouseup",function(){ isDown=false; row.classList.remove("dragging"); });
+    row.addEventListener("mousemove",function(e){
+      if(!isDown) return; e.preventDefault();
+      const x=e.pageX-row.offsetLeft;
+      row.scrollLeft=scrollLeft-(x-startX)*1.2;
+    });
+  });
+}
 </script>
 </body>
 </html>
