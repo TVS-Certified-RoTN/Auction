@@ -1350,6 +1350,32 @@ let previousScrollY = 0;
 let globalSearchKeyword = "";
 let auctionOpen = false;
 let testingMode = false; // set in DOMContentLoaded
+const API_BASE = "https://script.google.com/macros/s/AKfycbxSfTAJKu7bp_S9GfPN8UE2uLLIMfnMrzvs0wRMOuKPvPX9aghilQy6oeYH4buH_4DG/exec";
+
+async function apiGet(action, params){
+  const url = new URL(API_BASE);
+  url.searchParams.set("action", action);
+  Object.entries(params || {}).forEach(function(entry){
+    const key = entry[0], val = entry[1];
+    if(val !== undefined && val !== null) url.searchParams.set(key, String(val));
+  });
+  const res = await fetch(url.toString(), { method: "GET" });
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  return res.json();
+}
+
+async function apiPost(action, payload){
+  const form = new URLSearchParams();
+  form.set("action", action);
+  form.set("payload", JSON.stringify(payload || {}));
+
+  const res = await fetch(API_BASE, {
+    method: "POST",
+    body: form
+  });
+  if(!res.ok) throw new Error("HTTP "+res.status);
+  return res.json();
+}
 
 /* â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function getIncrement(p){ return p>=700000?7000:p>=500000?5000:2000; }
@@ -1434,8 +1460,8 @@ function login(){
   btn.disabled=true; btn.textContent="Verifying...";
   document.getElementById("loader").style.display="block";
 
-  google.script.run
-    .withSuccessHandler(function(r){
+  apiPost("loginDealer", { mobile: mobile })
+    .then(function(r){
       document.getElementById("loader").style.display="none";
       btn.disabled=false; btn.textContent="Verify Dealer";
       if(!r.success){ alert(r.message); return; }
@@ -1451,12 +1477,11 @@ function login(){
       showSkeletons();
       loadStock();
     })
-    .withFailureHandler(function(err){
+    .catch(function(err){
       document.getElementById("loader").style.display="none";
       btn.disabled=false; btn.textContent="Verify Dealer";
-      alert("Error: "+err.message);
-    })
-    .loginDealer(mobile);
+      alert("Error: "+(err && err.message ? err.message : err));
+    });
 }
 
 /* â”€â”€ SKELETON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -2185,19 +2210,23 @@ function processBid(vehicleId,amount,payDate,remarks,modal){
   btn.disabled=true;
   btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
 
-  google.script.run
-    .withSuccessHandler(function(r){
+  apiPost("submitBid", {
+      vehicleId: vehicleId,
+      dealerId: dealer.dealerId,
+      dealerName: dealer.dealerName,
+      mobile: dealer.mobile,
+      amount: amount,
+      paymentDate: payDate,
+      remarks: remarks
+    })
+    .then(function(r){
       btn.disabled=false; btn.textContent="Confirm & Submit";
       if(r.success){ modal.hide(); loadStock(); }
       alert(r.message);
     })
-    .withFailureHandler(function(err){
+    .catch(function(err){
       btn.disabled=false; btn.textContent="Confirm & Submit";
-      alert(err.message);
-    })
-    .submitBid({
-      vehicleId,dealerId:dealer.dealerId,dealerName:dealer.dealerName,
-      mobile:dealer.mobile,amount,paymentDate:payDate,remarks
+      alert(err && err.message ? err.message : err);
     });
 }
 
@@ -2207,17 +2236,21 @@ function openSummary(){
   document.getElementById("summaryContent").innerHTML="";
   document.getElementById("summaryLoader").style.display="block";
 
-  google.script.run
-    .withSuccessHandler(function(rows){
+  apiGet("getDealerSummary", { mobile: dealer.mobile })
+    .then(function(rows){
       document.getElementById("summaryLoader").style.display="none";
+      if(rows && rows.success===false){
+        document.getElementById("summaryContent").innerHTML=
+          '<p style="color:red;text-align:center;">Error: '+rows.message+'</p>';
+        return;
+      }
       renderSummary(rows);
     })
-    .withFailureHandler(function(err){
+    .catch(function(err){
       document.getElementById("summaryLoader").style.display="none";
       document.getElementById("summaryContent").innerHTML=
-        '<p style="color:red;text-align:center;">Error: '+err.message+'</p>';
-    })
-    .getDealerSummary(dealer.mobile);
+        '<p style="color:red;text-align:center;">Error: '+(err && err.message ? err.message : err)+'</p>';
+    });
 }
 
 function closeSummary(){
@@ -2315,15 +2348,14 @@ document.addEventListener("touchend",function(){ isPulling=false; },{passive:tru
 
 /* â”€â”€ LOAD STOCK (full render â€” login + post-bid-submit only) â”€â”€â”€ */
 function loadStock(){
-  google.script.run
-    .withSuccessHandler(function(r){
+  apiGet("getData")
+    .then(function(r){
       if(!r||!r.inventory){ alert("Data load failed. Please refresh."); return; }
       data=r;
       buildSnapshot(r);
       renderStock();
     })
-    .withFailureHandler(function(err){ alert("Error loading data: "+err.message); })
-    .getData();
+    .catch(function(err){ alert("Error loading data: "+(err && err.message ? err.message : err)); });
 }
 
 /* â”€â”€ SNAPSHOT helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -2348,8 +2380,8 @@ function buildSnapshot(d){
 /* â”€â”€ SILENT POLL â€” only patch changed cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function silentPoll(){
   if(!dealer.mobile) return;
-  google.script.run
-    .withSuccessHandler(function(r){
+  apiGet("getData")
+    .then(function(r){
       if(!r||!r.inventory) return;
 
       var bids     = r.allBids||[];
@@ -2444,8 +2476,7 @@ function silentPoll(){
 
       lastSnapshot = newSnap;
     })
-    .withFailureHandler(function(){ /* silent â€” ignore poll errors */ })
-    .getData();
+    .catch(function(){ /* silent â€” ignore poll errors */ });
 }
 
 /* â”€â”€ AUTO REFRESH â€” silent poll every 30s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
